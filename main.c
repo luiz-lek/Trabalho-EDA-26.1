@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "importation.h"
+#include "importer.h"
 
 int main() {
-    import_entities();
+    import_data();
     return 0;
 }

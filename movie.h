@@ -17,16 +17,6 @@
 typedef struct {
     char title[TITLE_LENGTH];
     char subtitle[SUB_TITLE_LENGTH];
-
-    uint8_t num_actors;
-    uint8_t num_directors;
-    uint8_t num_produtors;
-    uint8_t num_writers;
-    uint32_t actor[ACTORS_LENGTH];
-    uint32_t directors[DIRECTION_LENGTH];
-    uint32_t produtors[PRODUTORS_LENGTH];
-    uint32_t writers[WRITERS_LENGTH];
-
     uint16_t year;
 } Movie;
 

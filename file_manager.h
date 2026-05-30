@@ -20,20 +20,23 @@
 #define PATH_NODES "../requirements/Nodes.txt"
 #define PATH_RELATIONSHIPS "../requirements/Relationships.txt"
 
+#define DISK_NULL 0xFFFFFFFF
+
 #include "person.h"
 #include "b_plus_tree.h"
 #include <stdio.h>
 
-TreeNode* tree_node_load(FILE* fp, uint32_t offset);
-void tree_node_write(FILE* fp, TreeNode* node, uint32_t offset);
+#include "movie.h"
 
-Person* person_data_load(FILE* fp, uint32_t offset);
-void person_data_write(FILE* fp, uint32_t offset, Person* person);
+void tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
+void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
 
-uint32_t file_size(FILE* fp);
+void person_data_load(Person *p, FILE *fp, uint32_t offset);
+void person_save(Person *person, FILE *fp, uint32_t offset);
 
-/*
- * pendente: funções de ler/escrever filme
- *                                                  */
+void movie_load(Movie *m, FILE *fp, uint32_t offset);
+void movie_save(Movie *m, FILE *fp, uint32_t offset);
+
+uint32_t file_size(FILE *fp);
 
 #endif //TRABALHO_EDA_26_1_FILE_MANAGER_H

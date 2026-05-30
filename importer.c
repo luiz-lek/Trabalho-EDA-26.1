@@ -2,7 +2,7 @@
 // Created by luizao on 29/05/2026.
 //
 
-#include "importation.h"
+#include "importer.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +35,7 @@ uint16_t str_to_uint16(char* line) {
     return ano;
 }
 
-void fill_buffer_until_find_separator(char* line, char* buffer) {
+void fill_buffer_until_find_separator(char *line, char *buffer) {
     int i = 0;
     while (line[i] != '|' && line[i] != '\0') {
         buffer[i] = line[i];
@@ -46,7 +46,7 @@ void fill_buffer_until_find_separator(char* line, char* buffer) {
     memmove(line, line + i, strlen(line) - i + 1); // Sobrescreve o trecho já lido com o restante da string.
 }
 
-void fill_person(Person *p, char* line) {
+void fill_person(Person *p, char *line) {
     char buffer[LINE_LENGTH];
 
     fill_buffer_until_find_separator(line, buffer); // Le o identificador da entidade (Person ou Movie) e jogar fora.
@@ -62,7 +62,7 @@ void fill_person(Person *p, char* line) {
     person_print(p);
 }
 
-void fill_movie(Movie *m, char* line) {
+void fill_movie(Movie *m, char *line) {
     char buffer[LINE_LENGTH];
 
     fill_buffer_until_find_separator(line, buffer); // Pula a parte com o tipo da entidade (Person ou Movie).
@@ -82,7 +82,7 @@ void fill_movie(Movie *m, char* line) {
     movie_print(m);
 }
 
-void import_entities() {
+void import_data() {
     uint32_t person_id = -1;
     uint32_t movie_id = -1;
 

@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-void import_entities();
-uint16_t str_to_uint16(char* line);
+void import_data();
 
 #endif //TRABALHO_EDA_26_1_IMPORTATION_H

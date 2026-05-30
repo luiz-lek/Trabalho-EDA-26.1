@@ -7,16 +7,94 @@
 #include <stdlib.h>
 #include <string.h>
 
-TreeNode* tree_node_load(FILE* fp, uint32_t offset);
-void tree_node_write(FILE* fp, TreeNode* node, uint32_t offset);
+// Lê os campos na ordem q estão declarados na struct do nó.
+void tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+    int keys_length = 2 * t - 1, child_length = 2 * t;
 
-Person* person_data_load(FILE* fp, uint32_t offset) {
+    // Cálculo da quantidades de bytes que o nó ocupa
+    size_t buffer_size = sizeof(bool) + sizeof(uint16_t)
+                         + (keys_length * sizeof(uint32_t))
+                         + (child_length * sizeof(uint32_t))
+                         + sizeof(uint32_t);
+
+    uint8_t *buffer = malloc(buffer_size); // uint8_t porque cada índice do vetor aramazena 1 byte
+    if(!buffer) {
+        perror("(malloc) falha ao alocar buffer para leitura de nó.");
+        exit(-1);
+    }
+
+    fseek(fp, offset, SEEK_SET);
+    fread(buffer, buffer_size, 1, fp); // Lê todos o bytes da struct gravada no disco
+
+    uint32_t pos = 0;
+
+    // Copia os bytes de is_leaf do buffer
+    memcpy(&node->is_leaf, buffer + pos, sizeof(bool));
+    pos += sizeof(bool);
+
+    // Copia os bytes de num_keys do buffer
+    memcpy(&node->num_keys, buffer + pos, sizeof(uint16_t));
+    pos += sizeof(uint16_t);
+
+    // Copia os bytes do vetor de chaves
+    memcpy(node->keys, buffer + pos, sizeof(uint32_t) * keys_length);
+    pos += sizeof(uint32_t) * keys_length;
+
+    // Copia o vetor de offsets
+    memcpy(node->offsets, buffer + pos, sizeof(uint32_t) * child_length);
+    pos += sizeof(uint32_t) * child_length;
+
+    // Copia o offset do proximo
+    memcpy(&node->next, buffer + pos, sizeof(uint32_t));
+
+    free(buffer);
+}
+
+// Mesma lógica de cima, mas pra escrita
+void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+    int keys_length = 2 * t - 1, child_length = 2 * t;
+    size_t buffer_size = sizeof(bool) + sizeof(uint16_t)
+                         + (keys_length * sizeof(uint32_t))
+                         + (child_length * sizeof(uint32_t))
+                         + sizeof(uint32_t);
+
+    uint8_t *buffer = malloc(buffer_size);
+    if(!buffer) {
+        perror("(malloc) falha ao alocar buffer para escrita de nó.");
+        exit(-1);
+    }
+
+    uint32_t pos = 0; // Marca o offset pro inicio do novo bloco de escrita
+
+    // Escreve no buffer os bytes de is_leaf
+    memcpy(buffer + pos, &node->is_leaf, sizeof(bool));
+    pos += sizeof(bool);
+
+    // Escreve no buffer os bytes de num_chaves
+    memcpy(buffer + pos, &node->num_keys, sizeof(uint16_t));
+    pos += sizeof(uint16_t);
+
+    // Escreve no buffer os bytes do vetor de chaves
+    memcpy(buffer + pos, node->keys,  sizeof(uint32_t) * keys_length);
+    pos += sizeof(uint32_t) * keys_length;
+
+    // Escreve no buffer os bytes vetor de offsets
+    memcpy(buffer + pos, node->offsets,  sizeof(uint32_t) * child_length);
+    pos += sizeof(uint32_t) * child_length;
+
+    // Escreve no buffer os bytes do offset do proximo
+    memcpy(buffer + pos, &node->next, sizeof(uint32_t));
+
+    // Grava o buffer com todos os bytes de node
+    fseek(fp, offset, SEEK_SET);
+    fwrite(buffer, 1, buffer_size, fp);
+    free(buffer);
+}
+
+void person_data_load(Person *p, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_CUR);
-
-    Person* p = person_allocate();
     fread(p->name, sizeof(char), NAME_LENGTH, fp);
     fread(&p->year, sizeof(uint16_t), 1, fp);
-    return p;
 }
 
 void person_data_write(FILE *fp, uint32_t offset, Person *p) {
@@ -25,7 +103,21 @@ void person_data_write(FILE *fp, uint32_t offset, Person *p) {
     fwrite(&p->year, sizeof(uint16_t), 1, fp);
 }
 
-uint32_t file_size(FILE* fp) {
+void movie_load(Movie *m, FILE *fp, uint32_t offset) {
+    fseek(fp, offset, SEEK_SET);
+    fread(m->title, sizeof(char), TITLE_LENGTH, fp);
+    fread(m->subtitle, sizeof(char), SUB_TITLE_LENGTH, fp);
+    fread(&m->year, sizeof(uint16_t), 1, fp);
+}
+
+void movie_save(Movie *m, FILE *fp, uint32_t offset) {
+    fseek(fp, offset, SEEK_SET);
+    fwrite(m->title, sizeof(char), TITLE_LENGTH, fp);
+    fwrite(m->subtitle, sizeof(char), SUB_TITLE_LENGTH, fp);
+    fwrite(&m->year, sizeof(uint16_t), 1, fp);
+}
+
+uint32_t file_size(FILE *fp) {
     uint32_t size = 0;
     const uint32_t cur_position = ftell(fp);
 

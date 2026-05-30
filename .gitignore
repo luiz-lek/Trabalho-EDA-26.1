@@ -1,0 +1,24 @@
+# --- Pastas de compilação do CLion ---
+
+/build/
+
+# --- IDE ---
+.idea/
+*.iws
+*.vsl
+*.suo
+
+# --- Executáveis e arquivos binários gerados ---
+*.exe
+*.out
+*.app
+*.o
+*.obj
+
+# --- Arquivos de dados temporários ---
+*.idx
+*.dat
+*.db
+
+# ro7 n pode
+TARVBM.c
