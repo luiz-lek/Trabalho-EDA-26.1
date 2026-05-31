@@ -59,7 +59,7 @@ void fill_person(Person *p, char *line) {
     trim(buffer);
     p->year = str_to_uint16(buffer);
 
-    person_print(p);
+    // person_print(p);
 }
 
 void fill_movie(Movie *m, char *line) {
@@ -79,10 +79,10 @@ void fill_movie(Movie *m, char *line) {
     trim(buffer);
     strcpy(m->subtitle, buffer);
 
-    movie_print(m);
+    // movie_print(m);
 }
 
-void import_data() {
+void import_data(uint8_t t) {
     uint32_t person_id = -1;
     uint32_t movie_id = -1;
 
@@ -92,10 +92,15 @@ void import_data() {
         exit(-1);
     }
 
+    tree_initialize(t, PATH_INDEX_MOVIE_TREE, PATH_DATA_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
+    FILE *movie_data = fopen(PATH_DATA_MOVIE_TREE, "rb+");
+
     char buffer[LINE_LENGTH];
 
     Person p;
     Movie m;
+
+    uint32_t offset_movie_data;
 
     // pendente: adicionar as pessoas e filmes nas tabelas para relacionar seus ids.
     while (fgets(buffer, 256, fp) != NULL) {
@@ -106,7 +111,14 @@ void import_data() {
         }
         if(buffer[0] == 'M') {
             movie_id++;
+            offset_movie_data = file_size(movie_data);
             fill_movie(&m, buffer);
+            movie_save(&m, movie_data, offset_movie_data);
+            tree_insert(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE, movie_id, offset_movie_data);
+            tree_print(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
+            printf("\n\n");
         }
     }
+
+    tree_print(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
 }

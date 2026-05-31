@@ -13,6 +13,8 @@ typedef struct {
     uint16_t year;
 } Person;
 
+#define PERSON_SIZE sizeof(Person)
+
 Person* person_allocate();
 void person_copy(Person *p, Person *copy);
 void person_print(Person *p);
