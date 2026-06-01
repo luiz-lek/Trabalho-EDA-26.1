@@ -20,6 +20,7 @@ typedef struct {
 void tree_initialize(uint8_t t, char *index, char *data, char *metadata);
 uint32_t tree_search(FILE *index, uint8_t t, uint32_t offset, uint32_t key);
 void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data);
+void tree_remove(char *index, char *metadata, uint32_t key);
 void tree_print(char *index, char *metadata);
 
 #endif //TRABALHO_EDA_26_1_DATABASE_H

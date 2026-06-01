@@ -99,13 +99,13 @@ void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
     free(buffer);
 }
 
-void person_data_load(Person *p, FILE *fp, uint32_t offset) {
+void person_load(Person *p, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_CUR);
     fread(p->name, sizeof(char), NAME_LENGTH, fp);
     fread(&p->year, sizeof(uint16_t), 1, fp);
 }
 
-void person_data_write(FILE *fp, uint32_t offset, Person *p) {
+void person_save(Person *p, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_SET);
     fwrite(p->name, sizeof(char), NAME_LENGTH, fp);
     fwrite(&p->year, sizeof(uint16_t), 1, fp);
