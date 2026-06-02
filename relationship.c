@@ -42,7 +42,7 @@ void print_relationship(Relationship *r) {
     parser_STRING_relationship(relationship_type, r->relationship_type);
     printf("%d %s %d\n", r->person_id, relationship_type, r->movie_id);
     if(r->role[0] != '\0') {
-        printf("%s\n", r->role);
+        printf("Role: %s\n", r->role);
     }
 }
 
