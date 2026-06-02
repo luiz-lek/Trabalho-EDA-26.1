@@ -6,6 +6,10 @@
 #include "file_manager.h"
 
 #include <stdlib.h>
+#include <stdbool.h>
+
+// Para a descidas reursivas, são carregados apenas os nós atual.
+// Assim que o nó não for mais necessário, ele é liberao da memória.
 
 void tree_initialize(uint8_t t, char *index, char *data, char *metadata) {
     FILE *file = fopen(index, "wb");
@@ -229,6 +233,9 @@ void insert_not_complete(FILE *fp, uint32_t node_offset, uint32_t id, uint32_t o
         node_free_and_save(&current_node, t, fp, node_offset);
         node_free_and_save(&next_node, t, fp, next);
         node_free_and_save(&new_node, t, fp, new_node_offset);
+    } else {
+        node_free_arrays(&current_node);
+        node_free_arrays(&next_node);
     }
 
     insert_not_complete(fp, next_node_offset, id, offset_data, t);
@@ -475,10 +482,9 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
         printf("\nCASO 1\n");
         case_1(&current_node, i);
 
-        if(current_node.num_keys > 0) tree_node_save(&current_node, t, fp, offset_current_node);
+        if(current_node.num_keys > 0) node_free_and_save(&current_node, t, fp, offset_current_node);
         // Só fica com quantidade igual a 0 se a folha for a raiz
         else update_root(metadata, DISK_NULL);
-        node_free_arrays(&current_node);
         return;
     }
 

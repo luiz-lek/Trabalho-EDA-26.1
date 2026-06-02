@@ -3,6 +3,7 @@
 //
 
 #include "importer.h"
+#include "hash.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 #include "person.h"
 #include "file_manager.h"
 #include "movie.h"
+#include "relationship.h"
 
 void trim(char* str) {
     if(!str) return;
@@ -46,20 +48,23 @@ void fill_buffer_until_find_separator(char *line, char *buffer) {
     memmove(line, line + i, strlen(line) - i + 1); // Sobrescreve o trecho já lido com o restante da string.
 }
 
+void get_next_text(char *line, char *buffer) {
+    fill_buffer_until_find_separator(line, buffer);
+    trim(buffer);
+}
+
 void fill_person(Person *p, char *line) {
     char buffer[LINE_LENGTH];
 
     fill_buffer_until_find_separator(line, buffer); // Le o identificador da entidade (Person ou Movie) e jogar fora.
 
-    fill_buffer_until_find_separator(line, buffer); // Lê o nome da pessoa pro buffer.
-    trim(buffer);
+    get_next_text(line, buffer); // Lê o nome da pessoa pro buffer.
     strcpy(p->name, buffer);
 
-    fill_buffer_until_find_separator(line, buffer); // Lê a string do ano.
-    trim(buffer);
+    get_next_text(line, buffer); // Lê a string do ano.
+
     p->year = str_to_uint16(buffer);
 
-    // person_print(p);
 }
 
 void fill_movie(Movie *m, char *line) {
@@ -67,22 +72,19 @@ void fill_movie(Movie *m, char *line) {
 
     fill_buffer_until_find_separator(line, buffer); // Pula a parte com o tipo da entidade (Person ou Movie).
 
-    fill_buffer_until_find_separator(line, buffer); // Lê o título.
-    trim(buffer);
+    get_next_text(line, buffer); // Lê o título.
     strcpy(m->title, buffer);
 
-    fill_buffer_until_find_separator(line, buffer); // Lê a string ano.
-    trim(buffer);
+    get_next_text(line, buffer); // Lê a string ano.
     m->year = str_to_uint16(buffer);
 
-    fill_buffer_until_find_separator(line, buffer);
-    trim(buffer);
+    get_next_text(line, buffer); // Lê o subtítulo.
     strcpy(m->subtitle, buffer);
 
     // movie_print(m);
 }
 
-void import_data(uint8_t t) {
+void import_movies_and_persons(uint8_t t) {
     uint32_t person_id = -1;
     uint32_t movie_id = -1;
 
@@ -95,18 +97,26 @@ void import_data(uint8_t t) {
     tree_initialize(t, PATH_INDEX_MOVIE_TREE, PATH_DATA_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
     tree_initialize(t, PATH_INDEX_PERSON_TREE, PATH_DATA_PERSON_TREE, PATH_METADATA_PERSON_TREE);
 
-    FILE *movie_data = fopen(PATH_DATA_MOVIE_TREE, "rb+");
-    FILE *person_data = fopen(PATH_DATA_PERSON_TREE, "rb+");
-
+    FILE *movie_data = fopen(PATH_DATA_MOVIE_TREE, "wb");
+    if(!movie_data) {
+        perror("(fopen) Erro ao abrir arquivo de filmes.");
+        exit(EXIT_FAILURE);
+    }
+    FILE *person_data = fopen(PATH_DATA_PERSON_TREE, "wb");
+    if(!person_data) {
+        perror("(fopen) Erro ao abrir arquivo de pessoas.");
+        exit(EXIT_FAILURE);
+    }
     char buffer[LINE_LENGTH];
 
     Person p;
     Movie m;
 
-    uint32_t offset_movie_data, offset_person_data;
+    uint32_t offset_movie_data = 0, offset_person_data = 0;
 
     // pendente: adicionar as pessoas e filmes nas tabelas para relacionar seus ids.
-    while (fgets(buffer, 256, fp) != NULL) {
+
+    while (fgets(buffer, LINE_LENGTH, fp) != NULL) {
         buffer[strcspn(buffer, "\n")] = '\0';
         if(buffer[0] == 'P') {
             person_id++;
@@ -129,4 +139,56 @@ void import_data(uint8_t t) {
 
     fclose(movie_data);
     fclose(person_data);
+}
+
+void import_relationships(uint8_t t) {
+    FILE *fp = fopen(PATH_RELATIONSHIPS, "r");
+    if(!fp) {
+        perror("(fopen) falha ao abrir o arquivo de relações.");
+        exit(EXIT_FAILURE);
+    }
+    FILE *fr = fopen(PATH_RELATIONSHIPS_DATA, "wb");
+    if(!fr) {
+        perror("(fopen) falha ao abrir o arquivo de relações data.");
+        exit(EXIT_FAILURE);
+    }
+
+    char line[LINE_LENGTH];
+    char buffer[LINE_LENGTH];
+    Relationship relationship;
+    uint32_t person_id, movie_id;
+    while(fgets(line, LINE_LENGTH, fp) != NULL) {
+        line[strcspn(line, "\n")] = '\0';
+
+        fill_buffer_until_find_separator(line, buffer);
+        get_next_text(line, buffer);
+        person_id = get_id(buffer);
+        relationship.person_id = person_id;
+
+        get_next_text(line, buffer);
+        relationship.relationship_type = parse_relationship_STRING(buffer);
+
+        fill_buffer_until_find_separator(line, buffer);
+        get_next_text(line, buffer);
+        movie_id = get_id(buffer);
+        relationship.movie_id = movie_id;
+
+        if(relationship.relationship_type == ACTED_IN) {
+            get_next_text(line, buffer);
+            strcpy(relationship.role, buffer);
+        } else {
+            relationship.role[0] = '\0';
+        }
+
+        uint32_t end_file = file_size(fr);
+        save_data(fr, end_file, &relationship, RELATIONSHIP_SIZE);
+    }
+
+    fclose(fp);
+    fclose(fr);
+}
+
+void import_data(uint8_t t) {
+    import_movies_and_persons(t);
+    import_relationships(t);
 }

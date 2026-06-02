@@ -3,6 +3,7 @@
 #include "b_plus_tree.h"
 #include "file_manager.h"
 #include "importer.h"
+#include "relationship.h"
 
 int main() {
     import_data(4);
@@ -12,5 +13,6 @@ int main() {
     printf("\n\nÁrvore de pessoas\n\n");
     tree_print(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE);
 
+    print_file_relationships();
     return 0;
 }

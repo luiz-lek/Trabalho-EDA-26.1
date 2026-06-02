@@ -5,7 +5,6 @@
 #ifndef TRABALHO_EDA_26_1_DATABASE_H
 #define TRABALHO_EDA_26_1_DATABASE_H
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 

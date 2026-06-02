@@ -20,11 +20,15 @@
 #define PATH_NODES "../requirements/Nodes.txt"
 #define PATH_RELATIONSHIPS "../requirements/Relationships.txt"
 
+#define PATH_RELATIONSHIPS_DATA "../tree/relationships.dat"
+
 #define DISK_NULL 0xFFFFFFFF
 
 #include "person.h"
 #include "b_plus_tree.h"
+
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "movie.h"
 
@@ -39,6 +43,7 @@ void movie_save(Movie *m, FILE *fp, uint32_t offset);
 
 // Carrega structs genérica do arquivo de dados
 bool load_data(FILE *fp, uint32_t offset, void *data, size_t size);
+bool save_data(FILE *fp, uint32_t offset, void *data, size_t size);
 
 uint32_t file_size(FILE *fp);
 

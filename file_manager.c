@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 // Lê os campos na ordem q estão declarados na struct do nó.
 bool tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
@@ -128,6 +129,11 @@ void movie_save(Movie *m, FILE *fp, uint32_t offset) {
 bool load_data(FILE *fp, uint32_t offset, void *data, size_t size) {
     fseek(fp, offset, SEEK_SET);
     return fread(data, size, 1, fp) == 1;
+}
+
+bool save_data(FILE *fp, uint32_t offset, void *data, size_t size) {
+    fseek(fp, offset, SEEK_SET);
+    return fwrite(data, size, 1, fp) == 1;
 }
 
 uint32_t file_size(FILE *fp) {

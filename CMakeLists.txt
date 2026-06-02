@@ -8,12 +8,16 @@ add_executable (
     main.c
     file_manager.h
     person.h
-        person.c
-        file_manager.c
-        b_plus_tree.h
-        b_plus_tree.c
-        importer.h
-        importer.c
-        movie.c
-        movie.h
+    person.c
+    file_manager.c
+    b_plus_tree.h
+    b_plus_tree.c
+    importer.h
+    importer.c
+    movie.c
+    movie.h
+    hash.h
+    hash.c
+    relationship.h
+    relationship.c
 )
