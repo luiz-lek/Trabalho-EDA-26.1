@@ -37,51 +37,44 @@ uint16_t str_to_uint16(char* line) {
     return ano;
 }
 
-void fill_buffer_until_find_separator(char *line, char *buffer) {
+void jump_token(char *line) {
     int i = 0;
-    while (line[i] != '|' && line[i] != '\0') {
-        buffer[i] = line[i];
-        i++;
-    }
-    buffer[i] = '\0';
-    if (line[i] == '|') i++;
+    while(line[i] != '\0' && line[i] != '|') i++;
+    if(line[i] == '|') i++;
     memmove(line, line + i, strlen(line) - i + 1); // Sobrescreve o trecho já lido com o restante da string.
 }
 
-void get_next_text(char *line, char *buffer) {
-    fill_buffer_until_find_separator(line, buffer);
-    trim(buffer);
+void get_token(char *line, char *token_buffer) {
+    int i = 0;
+    while (line[i] != '|' && line[i] != '\0') {
+        token_buffer[i] = line[i];
+        i++;
+    }
+    token_buffer[i] = '\0';
+    if(line[i] == '|') i++;
+    memmove(line, line + i, strlen(line) - i + 1); // Sobrescreve o trecho já lido com o restante da string.
+}
+
+void get_token_formated(char *line, char *token_buffer) {
+    get_token(line, token_buffer);
+    trim(token_buffer);
 }
 
 void fill_person(Person *p, char *line) {
-    char buffer[LINE_LENGTH];
-
-    fill_buffer_until_find_separator(line, buffer); // Le o identificador da entidade (Person ou Movie) e jogar fora.
-
-    get_next_text(line, buffer); // Lê o nome da pessoa pro buffer.
-    strcpy(p->name, buffer);
-
-    get_next_text(line, buffer); // Lê a string do ano.
-
-    p->year = str_to_uint16(buffer);
-
+    char token_buffer[LINE_LENGTH];
+    jump_token(line); // Pula a parte do identificador da entidade (Person ou Movie).
+    get_token_formated(line, p->name); // Lê o nome da pessoa pro buffer.
+    get_token_formated(line, token_buffer); // Lê a string do ano.
+    p->year = str_to_uint16(token_buffer);
 }
 
 void fill_movie(Movie *m, char *line) {
-    char buffer[LINE_LENGTH];
-
-    fill_buffer_until_find_separator(line, buffer); // Pula a parte com o tipo da entidade (Person ou Movie).
-
-    get_next_text(line, buffer); // Lê o título.
-    strcpy(m->title, buffer);
-
-    get_next_text(line, buffer); // Lê a string ano.
-    m->year = str_to_uint16(buffer);
-
-    get_next_text(line, buffer); // Lê o subtítulo.
-    strcpy(m->subtitle, buffer);
-
-    // movie_print(m);
+    char token_buffer[LINE_LENGTH];
+    jump_token(line); // Pula a parte com o tipo da entidade (Person ou Movie).
+    get_token_formated(line, m->title); // Lê o título.
+    get_token_formated(line, token_buffer); // Lê a string ano.
+    m->year = str_to_uint16(token_buffer);
+    get_token_formated(line, m->subtitle); // Lê o subtítulo.
 }
 
 void import_movies_and_persons(uint8_t t) {
@@ -154,28 +147,28 @@ void import_relationships(uint8_t t) {
     }
 
     char line[LINE_LENGTH];
-    char buffer[LINE_LENGTH];
+    char toke_buffer[LINE_LENGTH];
     Relationship relationship;
     uint32_t person_id, movie_id;
     while(fgets(line, LINE_LENGTH, fp) != NULL) {
         line[strcspn(line, "\n")] = '\0';
 
-        fill_buffer_until_find_separator(line, buffer);
-        get_next_text(line, buffer);
-        person_id = get_id(buffer);
+        jump_token(line);
+        get_token_formated(line, toke_buffer);
+        person_id = get_id(toke_buffer);
         relationship.person_id = person_id;
 
-        get_next_text(line, buffer);
-        relationship.relationship_type = parse_relationship_STRING(buffer);
+        get_token_formated(line, toke_buffer);
+        relationship.relationship_type = parse_relationship_STRING(toke_buffer);
 
-        fill_buffer_until_find_separator(line, buffer);
-        get_next_text(line, buffer);
-        movie_id = get_id(buffer);
+        jump_token(line);
+        get_token_formated(line, toke_buffer);
+        movie_id = get_id(toke_buffer);
         relationship.movie_id = movie_id;
 
         if(relationship.relationship_type == ACTED_IN) {
-            get_next_text(line, buffer);
-            strcpy(relationship.role, buffer);
+            jump_token(line);
+            strcpy(relationship.role, toke_buffer);
         } else {
             relationship.role[0] = '\0';
         }
