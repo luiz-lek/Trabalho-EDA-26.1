@@ -164,7 +164,7 @@ void import_relationships(uint8_t t) {
         get_token_formated(line, token_buffer, '|');
         relationship.movie_id = get_id(token_buffer);
 
-        if(relationship.relationship_type == ACTED_IN) {
+        if(relationship.relationship_type == ACTED_IN) { // Só tem papel se for relação do tipo atuação
             jump_token(line, ':');
             get_token_formated(line, token_buffer, '|');
             strcpy(relationship.role, token_buffer);

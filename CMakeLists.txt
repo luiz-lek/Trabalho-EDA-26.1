@@ -18,6 +18,8 @@ add_executable (
     movie.h
     hash.h
     hash.c
+    header.h
+    header.c
     relationship.h
     relationship.c
 )

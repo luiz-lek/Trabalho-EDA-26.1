@@ -3,6 +3,7 @@
 //
 
 #include "b_plus_tree.h"
+#include "header.h"
 #include "file_manager.h"
 
 #include <stdlib.h>
@@ -25,15 +26,14 @@ void tree_initialize(uint8_t t, char *index, char *data, char *metadata) {
         exit(-1);
     }
     fclose(file);
-    file = fopen(metadata, "wb");
-    if (!file) {
-        perror("(fopen) falha ao abrir arquivo de dados.");
-        exit(-1);
-    }
-    uint32_t root = DISK_NULL;
-    fwrite(&t, sizeof(uint8_t), 1, file);
-    fwrite(&root, sizeof(uint32_t), 1, file);
-    fclose(file);
+
+
+    Header h;
+    h.root = DISK_NULL;
+    h.t = t;
+    h.first_leaf = DISK_NULL;
+    h.last_id_generated = 0;
+    save_header(metadata, &h);
 }
 
 void node_initialize(TreeNode *node, uint8_t t) {
@@ -65,6 +65,20 @@ void node_free_arrays(TreeNode *node) {
     }
 }
 
+void update_root(char *file_metadata, uint32_t new_root) {
+    Header h;
+    load_header(file_metadata, &h);
+    h.root = new_root;
+    save_header(file_metadata, &h);
+}
+
+void update_first_leaf(char *file_metadata, uint32_t new_first_leaf) {
+    Header h;
+    load_header(file_metadata, &h);
+    h.first_leaf = new_first_leaf;
+    save_header(file_metadata, &h);
+}
+
 void node_print(TreeNode *node) {
     printf("\n\nÉ folha: %d\n", node->is_leaf);
     printf("Num chaves: %d\n", node->num_keys);
@@ -75,44 +89,6 @@ void node_print(TreeNode *node) {
     for(int i = 0; i <= node->num_keys; i++) printf("%d ", node->offset[i]);
     printf("\n");
     printf("Próximo: %d\n", node->next);
-}
-
-uint8_t get_t(char *metadata) {
-    FILE *fp = fopen(metadata, "rb+");
-    if(!fp) {
-        perror("(fopen) falha ao abrir metadados");
-        exit(-1);
-    }
-    fseek(fp, 0, SEEK_SET);
-    uint8_t t;
-    fread(&t, sizeof(uint8_t), 1, fp);
-    fclose(fp);
-    return t;
-}
-
-void update_root(char *metadata, uint32_t offset_root) {
-    FILE *fp = fopen(metadata, "rb+");
-    if(!fp) {
-        perror("(fopen) falha ao abrir metadados");
-        exit(-1);
-    }
-    fseek(fp, sizeof(uint8_t), SEEK_SET);
-    fwrite(&offset_root, sizeof(uint32_t), 1, fp);
-    fclose(fp);
-}
-
-uint32_t get_root(char *metadata) {
-    FILE *fp = fopen(metadata, "rb+");
-    if(!fp) {
-        perror("(fopen) falha ao abrir metadados");
-        exit(-1);
-    }
-
-    uint32_t offset_root = DISK_NULL;
-    fseek(fp, sizeof(uint8_t), SEEK_SET);
-    fread(&offset_root, sizeof(uint32_t), 1, fp);
-    fclose(fp);
-    return offset_root;
 }
 
 // Inicializa os vetores e carrega do disco
@@ -248,8 +224,11 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
         exit(-1);
     }
 
-    uint32_t offset_root = get_root(metadata);
-    uint8_t t = get_t(metadata);
+    Header h;
+    load_header(metadata, &h);
+    const uint8_t t = h.t;
+    uint32_t offset_root = h.root;
+
     if(tree_search(fi, t, offset_root, key) != DISK_NULL) {
         fclose(fi);
         return;
@@ -264,7 +243,9 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
         offset_root = file_size(fi);
 
         node_free_and_save(&root, t, fi, offset_root);
-        update_root(metadata, offset_root);
+        h.root = offset_root;
+        h.first_leaf = offset_root;
+        save_header(metadata, &h);
         return;
     }
 
@@ -287,7 +268,8 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
         node_free_and_save(&root, t, fi, offset_root);
         offset_root = file_size(fi);
         node_free_and_save(&new_root, t, fi, offset_root);
-        update_root(metadata, offset_root);
+        h.root = offset_root;
+        save_header(metadata, &h);
 
         insert_not_complete(fi, offset_root, key, offset_data, t);
     } else {
@@ -326,11 +308,14 @@ void tree_print(char *index, char *metadata) {
         exit(-1);
     }
 
-    uint32_t offset_root = get_root(metadata);
+    Header h;
+    load_header(metadata, &h);
+
+    uint32_t offset_root = h.root;
     if(offset_root == DISK_NULL) {
         printf("Árvore vazia!");
     } else {
-        uint8_t t = get_t(metadata);
+        uint8_t t = h.t;
         imp(fi, offset_root, t, 0);
     }
 
@@ -410,7 +395,10 @@ bool case_3b_less_than_num_keys(TreeNode *current_node, TreeNode *y, TreeNode *z
             y->key[t+j] = z->key[j];
             y->offset[t+j] = z->offset[j];
         }
-        else y->key[t+j-1] = z->key[j];
+        else {
+            y->key[t+j-1] = z->key[j];
+            y->offset[t+j-1] = z->offset[j];
+        }
         y->num_keys++;
         j++;
     }
@@ -484,7 +472,10 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
 
         if(current_node.num_keys > 0) node_free_and_save(&current_node, t, fp, offset_current_node);
         // Só fica com quantidade igual a 0 se a folha for a raiz
-        else update_root(metadata, DISK_NULL);
+        else {
+            update_root(metadata, DISK_NULL);
+            update_first_leaf(metadata, DISK_NULL);
+        }
         return;
     }
 
@@ -538,7 +529,9 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
 
                 bool is_new_root = case_3b_less_than_num_keys(&current_node, &y, &z, t, i);
 
-                if (is_new_root) update_root(metadata, offset_y);
+                if (is_new_root) {
+                    update_root(metadata, offset_y);
+                }
                 else node_free_and_save(&current_node, t, fp, offset_current_node);
 
                 node_free_and_save(&y, t, fp, offset_y);
@@ -566,8 +559,11 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
 }
 
 void tree_remove(char *index, char *metadata, uint32_t key) {
-    uint32_t root = get_root(metadata);
-    uint8_t t = get_t(metadata);
+    Header h;
+    load_header(metadata, &h);
+
+    uint32_t root = h.root;
+    uint8_t t = h.t;
     FILE *fp = fopen(index, "rb+");
     if(!fp) {
         perror("(perror) falha ao abrir arquivo de indices");
