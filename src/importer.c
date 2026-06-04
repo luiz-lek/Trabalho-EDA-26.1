@@ -8,6 +8,8 @@
 #include "../include/file_manager.h"
 #include "../include/movie.h"
 #include "../include/relationship.h"
+#include "../include/movie_tree.h"
+#include "../include/person_tree.h"
 
 #include <string.h>
 
@@ -83,8 +85,8 @@ void import_movies_and_persons(uint8_t t) {
 
     FILE* fp = open_file(PATH_NODES, "r");
 
-    tree_initialize(t, PATH_INDEX_MOVIE_TREE, PATH_DATA_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
-    tree_initialize(t, PATH_INDEX_PERSON_TREE, PATH_DATA_PERSON_TREE, PATH_METADATA_PERSON_TREE);
+    movie_tree_initialize(t);
+    person_tree_initialize(t);
 
     hash_initialize(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, TAM_HASH);
     hash_initialize(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, TAM_HASH);
@@ -110,7 +112,7 @@ void import_movies_and_persons(uint8_t t) {
             offset_person_data = file_size(person_data);
             person_write(&p, person_data, offset_person_data);
             hash_insert(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, TAM_HASH, p.name, person_id);
-            tree_insert(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE, person_id, offset_person_data);
+            person_tree_insert(person_id, offset_person_data);
         }
         if(buffer[0] == 'M') {
             movie_id++;
@@ -119,7 +121,7 @@ void import_movies_and_persons(uint8_t t) {
             offset_movie_data = file_size(movie_data);
             movie_write(&m, movie_data, offset_movie_data);
             hash_insert(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, TAM_HASH, m.title, movie_id);
-            tree_insert(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE, movie_id, offset_movie_data);
+            movie_tree_insert(movie_id, offset_movie_data);
         }
     }
 

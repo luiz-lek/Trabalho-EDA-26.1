@@ -23,8 +23,8 @@ void movie_copy(Movie *dest, Movie *src) {
 
 void movie_print(Movie *movie) {
     if(movie) {
-        printf("\n----- FILME -----\n\tTitle: %s\n", movie->title);
-        printf("\tSubtitle: %s\n", movie->subtitle);
-        printf("\tYear: %d\n", movie->year);
+        printf("\n----- FILME -----\n\tTítulo: %s\n", movie->title);
+        printf("\tSubtítulo: %s\n", movie->subtitle);
+        printf("\tAno: %d\n", movie->year);
     }
 }

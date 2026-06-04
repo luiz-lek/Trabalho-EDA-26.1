@@ -1,20 +1,22 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdint.h>
 
 #include "../include/b_plus_tree.h"
 #include "../include/file_manager.h"
 #include "../include/importer.h"
+#include "../include/movie_tree.h"
+#include "../include/person_tree.h"
 #include "../include/relationship.h"
 
 int main() {
-    import_data(4);
+    import_data(6);
 
-    // printf("Árvore de filmes\n\n");
-    // tree_print(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
-    // printf("\n\nÁrvore de pessoas\n\n");
-    // tree_print(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE);
-    //
-    print_file_relationships();
+    printf("Árvore de filmes\n\n");
+    tree_print(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
+    printf("\n\nÁrvore de pessoas\n\n");
+    tree_print(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE);
+
+    // print_file_relationships();
 
     // Person person;
     // uint32_t offset_person = tree_search(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE, 120);
@@ -30,5 +32,13 @@ int main() {
     //     person_print(&person);
     // }
 
+    Person p;
+    uint32_t offset = person_tree_search_by_name("Ed Harris");
+
+    FILE *fp = open_file(PATH_DATA_PERSON_TREE, "rb");
+    read_data(fp, offset, &p, sizeof(Person));
+    person_print(&p);
+
+    fclose(fp);
     return 0;
 }
