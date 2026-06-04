@@ -85,11 +85,11 @@ void node_print(TreeNode *node) {
 // Obs. Liberar os vetores assim q terminar de usar a struct carregada
 void node_initialize_and_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t node_offset) {
     node_initialize(node, t);
-    tree_node_load(node, t, fp, node_offset);
+    tree_node_read(node, t, fp, node_offset);
 }
 
 void node_free_and_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t node_offset) {
-    tree_node_save(node, t, fp, node_offset);
+    tree_node_write(node, t, fp, node_offset);
     node_free_arrays(node);
 }
 
@@ -248,7 +248,7 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
         return;
     }
 
-    tree_node_load(&root, t, fi, offset_root);
+    tree_node_read(&root, t, fi, offset_root);
     uint32_t max_keys = 2 * t -1;
 
     if(root.num_keys == max_keys) {

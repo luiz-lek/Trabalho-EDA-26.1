@@ -32,18 +32,18 @@
 
 #include "movie.h"
 
-bool tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
-void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
+bool tree_node_read(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
+void tree_node_write(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
 
-void person_save(Person *p, FILE *fp, uint32_t offset);
-void person_load(Person *person, FILE *fp, uint32_t offset);
+void person_write(Person *p, FILE *fp, uint32_t offset);
+void person_read(Person *person, FILE *fp, uint32_t offset);
 
-void movie_load(Movie *m, FILE *fp, uint32_t offset);
-void movie_save(Movie *m, FILE *fp, uint32_t offset);
+void movie_read(Movie *m, FILE *fp, uint32_t offset);
+void movie_write(Movie *m, FILE *fp, uint32_t offset);
 
 // Carrega structs genérica do arquivo de dados
-bool load_data(FILE *fp, uint32_t offset, void *data, size_t size);
-bool save_data(FILE *fp, uint32_t offset, void *data, size_t size);
+bool read_data(FILE *fp, uint32_t offset, void *data, size_t size);
+bool write_data(FILE *fp, uint32_t offset, void *data, size_t size);
 
 FILE* open_file(const char *filename, const char *mode);
 

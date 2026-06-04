@@ -10,7 +10,7 @@
 
 void load_header(char *metadata_file, Header *h) {
     FILE *fp = open_file(metadata_file, "rb");
-    load_data(fp, 0, h, HEADER_SIZE);
+    read_data(fp, 0, h, HEADER_SIZE);
     fclose(fp);
 }
 
@@ -21,6 +21,6 @@ void save_header(char *metadata_file, Header *h) {
         exit(EXIT_FAILURE);
     }
 
-    save_data(fp, 0, h, HEADER_SIZE);
+    write_data(fp, 0, h, HEADER_SIZE);
     fclose(fp);
 }

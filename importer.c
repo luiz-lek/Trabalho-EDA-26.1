@@ -86,6 +86,9 @@ void import_movies_and_persons(uint8_t t) {
     tree_initialize(t, PATH_INDEX_MOVIE_TREE, PATH_DATA_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
     tree_initialize(t, PATH_INDEX_PERSON_TREE, PATH_DATA_PERSON_TREE, PATH_METADATA_PERSON_TREE);
 
+    hash_initialize(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, TAM_HASH);
+    hash_initialize(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, TAM_HASH);
+
     FILE *movie_data = open_file(PATH_DATA_MOVIE_TREE, "wb");
     FILE *person_data = open_file(PATH_DATA_PERSON_TREE, "wb");
 
@@ -105,7 +108,8 @@ void import_movies_and_persons(uint8_t t) {
             fill_person(&p, buffer);
 
             offset_person_data = file_size(person_data);
-            person_save(&p, person_data, offset_person_data);
+            person_write(&p, person_data, offset_person_data);
+            hash_insert(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, TAM_HASH, p.name, person_id);
             tree_insert(PATH_INDEX_PERSON_TREE, PATH_METADATA_PERSON_TREE, person_id, offset_person_data);
         }
         if(buffer[0] == 'M') {
@@ -113,7 +117,8 @@ void import_movies_and_persons(uint8_t t) {
             fill_movie(&m, buffer);
 
             offset_movie_data = file_size(movie_data);
-            movie_save(&m, movie_data, offset_movie_data);
+            movie_write(&m, movie_data, offset_movie_data);
+            hash_insert(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, TAM_HASH, m.title, movie_id);
             tree_insert(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE, movie_id, offset_movie_data);
         }
     }
@@ -135,14 +140,14 @@ void import_relationships(uint8_t t) {
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = get_id(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, token_buffer);;
+        relationship.person_id = get_id(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, TAM_HASH, token_buffer);;
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = get_id(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, token_buffer);
+        relationship.movie_id = get_id(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, TAM_HASH, token_buffer);
 
         if(relationship.relationship_type == ACTED_IN) { // Só tem papel se for relação do tipo atuação
             jump_token(line, ':');
@@ -153,7 +158,7 @@ void import_relationships(uint8_t t) {
         }
 
         uint32_t end_file = file_size(fr);
-        save_data(fr, end_file, &relationship, RELATIONSHIP_SIZE);
+        write_data(fr, end_file, &relationship, RELATIONSHIP_SIZE);
     }
 
     fclose(fp);

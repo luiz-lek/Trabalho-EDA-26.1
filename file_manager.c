@@ -9,7 +9,7 @@
 #include <stdbool.h>
 
 // Lê os campos na ordem q estão declarados na struct do nó.
-bool tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+bool tree_node_read(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
     if(offset == DISK_NULL) return false;
 
     int keys_length = 2 * t - 1, child_length = 2 * t;
@@ -60,7 +60,7 @@ bool tree_node_load(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
 }
 
 // Mesma lógica de cima, mas pra escrita
-void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+void tree_node_write(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
     int keys_length = 2 * t - 1, child_length = 2 * t;
     size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)
                          + (keys_length * sizeof(uint32_t))
@@ -100,38 +100,38 @@ void tree_node_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
     free(buffer);
 }
 
-void person_load(Person *p, FILE *fp, uint32_t offset) {
+void person_read(Person *p, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_CUR);
     fread(p->name, sizeof(char), NAME_LENGTH, fp);
     fread(&p->year, sizeof(uint16_t), 1, fp);
 }
 
-void person_save(Person *p, FILE *fp, uint32_t offset) {
+void person_write(Person *p, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_SET);
     fwrite(p->name, sizeof(char), NAME_LENGTH, fp);
     fwrite(&p->year, sizeof(uint16_t), 1, fp);
 }
 
-void movie_load(Movie *m, FILE *fp, uint32_t offset) {
+void movie_read(Movie *m, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_SET);
     fread(m->title, sizeof(char), TITLE_LENGTH, fp);
     fread(m->subtitle, sizeof(char), SUB_TITLE_LENGTH, fp);
     fread(&m->year, sizeof(uint16_t), 1, fp);
 }
 
-void movie_save(Movie *m, FILE *fp, uint32_t offset) {
+void movie_write(Movie *m, FILE *fp, uint32_t offset) {
     fseek(fp, offset, SEEK_SET);
     fwrite(m->title, sizeof(char), TITLE_LENGTH, fp);
     fwrite(m->subtitle, sizeof(char), SUB_TITLE_LENGTH, fp);
     fwrite(&m->year, sizeof(uint16_t), 1, fp);
 }
 
-bool load_data(FILE *fp, uint32_t offset, void *data, size_t size) {
+bool read_data(FILE *fp, uint32_t offset, void *data, size_t size) {
     fseek(fp, offset, SEEK_SET);
     return fread(data, size, 1, fp) == 1;
 }
 
-bool save_data(FILE *fp, uint32_t offset, void *data, size_t size) {
+bool write_data(FILE *fp, uint32_t offset, void *data, size_t size) {
     fseek(fp, offset, SEEK_SET);
     return fwrite(data, size, 1, fp) == 1;
 }

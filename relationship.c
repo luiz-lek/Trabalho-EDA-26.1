@@ -51,12 +51,12 @@ void print_file_relationships() {
 
     Relationship r;
     uint32_t current = 0;
-    bool read = load_data(fp, current, &r, RELATIONSHIP_SIZE);
+    bool read = read_data(fp, current, &r, RELATIONSHIP_SIZE);
 
     while(read) {
         print_relationship(&r);
         current += RELATIONSHIP_SIZE;
-        read = load_data(fp, current, &r, RELATIONSHIP_SIZE);
+        read = read_data(fp, current, &r, RELATIONSHIP_SIZE);
     }
 
     fclose(fp);

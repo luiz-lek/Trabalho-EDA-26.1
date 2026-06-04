@@ -5,14 +5,15 @@
 #ifndef TRABALHO_EDA_26_1_HASH_H
 #define TRABALHO_EDA_26_1_HASH_H
 
-#define PATH_HASH_MOVIE_TABLE "../hash/movie_table/"
-#define PATH_HASH_MOVIE_DATA "../hash/movie_data/"
+#define PATH_HASH_MOVIE_TABLE "../hash/movie/table.dat"
+#define PATH_HASH_MOVIE_DATA "../hash/movie/data.dat"
 
-#define PATH_HASH_PERSON_TABLE "../hash/person/person_table/"
-#define PATH_HASH_PERSON_DATA "../hash/person_data/"
+#define PATH_HASH_PERSON_TABLE "../hash/person/table.dat"
+#define PATH_HASH_PERSON_DATA "../hash/person/data.dat"
+
+# define TAM_HASH 101
 
 #define HASH_NAME_LENGTH 40
-#define TAM_HASH 101
 
 #include <stdint.h>
 
@@ -21,11 +22,11 @@ typedef struct {
     uint32_t id;
     uint32_t next;
     uint8_t valid;
-} data;
+} HashData;
 
-void hash_initialize(char *hash, char *data);
-void hash_insert(char *hash, char *data, char *name, uint32_t id);
-void remove_data(char *hash, char *data, uint32_t id);
-uint32_t get_id(char *hash, char *data, char *name);
+void hash_initialize(char *table, char *data, uint32_t num_buckets);
+void hash_insert(char *table, char *data, uint32_t num_buckets, const char *string, uint32_t id);
+void remove_data(char *table, char *data, uint32_t num_buckets, const char *string);
+uint32_t get_id(char *table, char *data, uint32_t num_buckets, const char *string);
 
 #endif //TRABALHO_EDA_26_1_HASH
