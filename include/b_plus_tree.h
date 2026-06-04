@@ -6,7 +6,6 @@
 #define TRABALHO_EDA_26_1_DATABASE_H
 
 #include <stdint.h>
-#include <stdio.h>
 
 typedef struct {
     uint8_t is_leaf;

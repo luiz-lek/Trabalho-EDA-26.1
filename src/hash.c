@@ -2,8 +2,8 @@
 // Created by luizao on 01/06/2026.
 //
 
-#include "hash.h"
-#include "file_manager.h"
+#include "../include/hash.h"
+#include "../include/file_manager.h"
 
 #include <stdio.h>
 #include <string.h>

@@ -2,13 +2,13 @@
 // Created by luizao on 01/06/2026.
 //
 
-#include "relationship.h"
+#include "../include/relationship.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "file_manager.h"
+#include "../include/file_manager.h"
 
 RelationshipType parse_relationship_STRING(const char *string) {
     if(strcmp(string, "ACTED_IN") == 0) return ACTED_IN;

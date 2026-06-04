@@ -2,7 +2,7 @@
 // Created by luizao on 30/05/2026.
 //
 
-#include "movie.h"
+#include "../include/movie.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -2,8 +2,8 @@
 // Created by luizao on 02/06/2026.
 //
 
-#include "header.h"
-#include "file_manager.h"
+#include "../include/header.h"
+#include "../include/file_manager.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -2,16 +2,16 @@
 // Created by luizao on 29/05/2026.
 //
 
-#include "importer.h"
-#include "hash.h"
+#include "../include/importer.h"
+#include "../include/hash.h"
+#include "../include/person.h"
+#include "../include/file_manager.h"
+#include "../include/movie.h"
+#include "../include/relationship.h"
 
-#include <stdlib.h>
 #include <string.h>
 
-#include "person.h"
-#include "file_manager.h"
-#include "movie.h"
-#include "relationship.h"
+
 
 void trim(char* str) {
     if(!str) return;

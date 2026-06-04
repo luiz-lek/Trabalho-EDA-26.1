@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "b_plus_tree.h"
-#include "file_manager.h"
-#include "importer.h"
-#include "relationship.h"
+#include "../include/b_plus_tree.h"
+#include "../include/file_manager.h"
+#include "../include/importer.h"
+#include "../include/relationship.h"
 
 int main() {
     import_data(4);

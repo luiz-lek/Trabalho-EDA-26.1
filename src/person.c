@@ -2,7 +2,7 @@
 // Created by luizao on 29/05/2026.
 //
 
-#include "person.h"
+#include "../include/person.h"
 
 #include <stdio.h>
 #include <stdlib.h>

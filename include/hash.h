@@ -5,12 +5,6 @@
 #ifndef TRABALHO_EDA_26_1_HASH_H
 #define TRABALHO_EDA_26_1_HASH_H
 
-#define PATH_HASH_MOVIE_TABLE "../hash/movie/table.dat"
-#define PATH_HASH_MOVIE_DATA "../hash/movie/data.dat"
-
-#define PATH_HASH_PERSON_TABLE "../hash/person/table.dat"
-#define PATH_HASH_PERSON_DATA "../hash/person/data.dat"
-
 # define TAM_HASH 101
 
 #define HASH_NAME_LENGTH 40

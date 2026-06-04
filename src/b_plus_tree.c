@@ -2,9 +2,9 @@
 // Created by luizao on 29/05/2026.
 //
 
-#include "b_plus_tree.h"
-#include "header.h"
-#include "file_manager.h"
+#include "../include/b_plus_tree.h"
+#include "../include/header.h"
+#include "../include/file_manager.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
