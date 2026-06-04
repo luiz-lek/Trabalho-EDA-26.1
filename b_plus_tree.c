@@ -103,7 +103,7 @@ void node_free_and_save(TreeNode *node, uint8_t t, FILE *fp, uint32_t node_offse
     node_free_arrays(node);
 }
 
-uint32_t tree_search(FILE *index, uint8_t t, uint32_t offset, uint32_t key) {
+uint32_t search_key(FILE *index, uint8_t t, uint32_t offset, uint32_t key) {
     if (offset == DISK_NULL) return DISK_NULL;
 
     TreeNode node;
@@ -134,7 +134,22 @@ uint32_t tree_search(FILE *index, uint8_t t, uint32_t offset, uint32_t key) {
 
     node_free_arrays(&node); // Libera a memória antes de fazer a chamada recursiva
 
-    return tree_search(index, t, next_child, key);
+    return search_key(index, t, next_child, key);
+}
+
+uint32_t tree_search(char *index, char *metadata, uint32_t key) {
+    FILE *fpi = fopen(index, "rb");
+    if(!fpi) {
+        perror("(fopen) falha ao abrir arquivo de índices para busca.");
+        exit(EXIT_FAILURE);
+    }
+
+    Header h;
+    load_header(metadata, &h);
+
+    uint32_t offset_data = search_key(fpi, h.t, h.root, key);
+    fclose(fpi);
+    return offset_data;
 }
 
 void division(TreeNode *x, TreeNode *y, TreeNode *z, uint32_t offset_z, int i, uint8_t t) {
@@ -229,7 +244,7 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
     const uint8_t t = h.t;
     uint32_t offset_root = h.root;
 
-    if(tree_search(fi, t, offset_root, key) != DISK_NULL) {
+    if(search_key(fi, t, offset_root, key) != DISK_NULL) {
         fclose(fi);
         return;
     }
@@ -243,6 +258,8 @@ void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data
         offset_root = file_size(fi);
 
         node_free_and_save(&root, t, fi, offset_root);
+        fclose(fi);
+
         h.root = offset_root;
         h.first_leaf = offset_root;
         save_header(metadata, &h);

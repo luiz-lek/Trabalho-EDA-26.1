@@ -126,7 +126,6 @@ void import_movies_and_persons(uint8_t t) {
             offset_movie_data = file_size(movie_data);
             movie_save(&m, movie_data, offset_movie_data);
             tree_insert(PATH_INDEX_MOVIE_TREE, PATH_METADATA_MOVIE_TREE, movie_id, offset_movie_data);
-            printf("\n\n");
         }
     }
 
@@ -155,14 +154,14 @@ void import_relationships(uint8_t t) {
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = get_id(token_buffer);;
+        relationship.person_id = get_id(PATH_HASH_ID_TABLE, PATH_HASH_ID_DATA, token_buffer);;
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = get_id(token_buffer);
+        relationship.movie_id = get_id(PATH_HASH_ID_TABLE, PATH_HASH_ID_DATA, token_buffer);
 
         if(relationship.relationship_type == ACTED_IN) { // Só tem papel se for relação do tipo atuação
             jump_token(line, ':');

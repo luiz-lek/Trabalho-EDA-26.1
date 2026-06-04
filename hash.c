@@ -4,6 +4,6 @@
 
 #include "hash.h"
 
-uint32_t get_id(char *name) {
+uint32_t get_id(char *hash, char *data, char *name) {
     return 1;
 }
