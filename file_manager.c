@@ -146,3 +146,13 @@ uint32_t file_size(FILE *fp) {
     fseek(fp, cur_position, SEEK_SET);
     return size;
 }
+
+FILE* open_file(const char *filename, const char *mode) {
+    FILE *fp = fopen(filename, mode);
+    if(!fp) {
+        fprintf(stderr,"ERROR: não foi possível abrir o arquivo \"%s\" no modo \"%s\"\n", filename, mode);
+        perror("Detalhe: ");
+        exit(EXIT_FAILURE);
+    }
+    return fp;
+}

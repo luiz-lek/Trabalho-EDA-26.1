@@ -81,25 +81,14 @@ void import_movies_and_persons(uint8_t t) {
     uint32_t person_id = -1;
     uint32_t movie_id = -1;
 
-    FILE* fp = fopen(PATH_NODES, "r");
-    if(!fp) {
-        perror("Erro ao abrir arquivo de nodes.");
-        exit(-1);
-    }
+    FILE* fp = open_file(PATH_NODES, "r");
 
     tree_initialize(t, PATH_INDEX_MOVIE_TREE, PATH_DATA_MOVIE_TREE, PATH_METADATA_MOVIE_TREE);
     tree_initialize(t, PATH_INDEX_PERSON_TREE, PATH_DATA_PERSON_TREE, PATH_METADATA_PERSON_TREE);
 
-    FILE *movie_data = fopen(PATH_DATA_MOVIE_TREE, "wb");
-    if(!movie_data) {
-        perror("(fopen) Erro ao abrir arquivo de filmes.");
-        exit(EXIT_FAILURE);
-    }
-    FILE *person_data = fopen(PATH_DATA_PERSON_TREE, "wb");
-    if(!person_data) {
-        perror("(fopen) Erro ao abrir arquivo de pessoas.");
-        exit(EXIT_FAILURE);
-    }
+    FILE *movie_data = open_file(PATH_DATA_MOVIE_TREE, "wb");
+    FILE *person_data = open_file(PATH_DATA_PERSON_TREE, "wb");
+
     char buffer[LINE_LENGTH];
 
     Person p;
@@ -134,16 +123,8 @@ void import_movies_and_persons(uint8_t t) {
 }
 
 void import_relationships(uint8_t t) {
-    FILE *fp = fopen(PATH_RELATIONSHIPS, "r");
-    if(!fp) {
-        perror("(fopen) falha ao abrir o arquivo de relações.");
-        exit(EXIT_FAILURE);
-    }
-    FILE *fr = fopen(PATH_RELATIONSHIPS_DATA, "wb");
-    if(!fr) {
-        perror("(fopen) falha ao abrir o arquivo de relações data.");
-        exit(EXIT_FAILURE);
-    }
+    FILE *fp = open_file(PATH_RELATIONSHIPS, "r");
+    FILE *fr = open_file(PATH_RELATIONSHIPS_DATA, "wb");
 
     char line[LINE_LENGTH];
     char token_buffer[LINE_LENGTH];
@@ -154,14 +135,14 @@ void import_relationships(uint8_t t) {
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = get_id(PATH_HASH_ID_TABLE, PATH_HASH_ID_DATA, token_buffer);;
+        relationship.person_id = get_id(PATH_HASH_PERSON_TABLE, PATH_HASH_PERSON_DATA, token_buffer);;
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = get_id(PATH_HASH_ID_TABLE, PATH_HASH_ID_DATA, token_buffer);
+        relationship.movie_id = get_id(PATH_HASH_MOVIE_TABLE, PATH_HASH_MOVIE_DATA, token_buffer);
 
         if(relationship.relationship_type == ACTED_IN) { // Só tem papel se for relação do tipo atuação
             jump_token(line, ':');

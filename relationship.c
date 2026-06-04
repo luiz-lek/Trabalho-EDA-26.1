@@ -47,11 +47,7 @@ void print_relationship(Relationship *r) {
 }
 
 void print_file_relationships() {
-    FILE *fp = fopen(PATH_RELATIONSHIPS_DATA, "rb");
-    if(!fp) {
-        perror("(fopen) falha ao abrir arquivo de relações data");
-        exit(EXIT_FAILURE);
-    }
+    FILE *fp = open_file(PATH_RELATIONSHIPS_DATA, "rb");
 
     Relationship r;
     uint32_t current = 0;

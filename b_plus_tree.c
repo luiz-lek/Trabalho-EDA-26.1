@@ -13,20 +13,10 @@
 // Assim que o nó não for mais necessário, ele é liberao da memória.
 
 void tree_initialize(uint8_t t, char *index, char *data, char *metadata) {
-    FILE *file = fopen(index, "wb");
-    if (!file) {
-        perror("(fopen) falha ao abrir arquivo de índices");
-        exit(-1);
-    }
+    FILE *file = open_file(index, "wb");
     fclose(file);
-
-    file = fopen(data, "wb");
-    if (!file) {
-        perror("(fopen) falha ao abrir arquivo de dados.");
-        exit(-1);
-    }
+    file = open_file(data, "wb");
     fclose(file);
-
 
     Header h;
     h.root = DISK_NULL;
@@ -138,11 +128,7 @@ uint32_t search_key(FILE *index, uint8_t t, uint32_t offset, uint32_t key) {
 }
 
 uint32_t tree_search(char *index, char *metadata, uint32_t key) {
-    FILE *fpi = fopen(index, "rb");
-    if(!fpi) {
-        perror("(fopen) falha ao abrir arquivo de índices para busca.");
-        exit(EXIT_FAILURE);
-    }
+    FILE *fpi = open_file(index, "rb");
 
     Header h;
     load_header(metadata, &h);
@@ -233,11 +219,7 @@ void insert_not_complete(FILE *fp, uint32_t node_offset, uint32_t id, uint32_t o
 }
 
 void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data) {
-    FILE *fi = fopen(index,"rb+");
-    if(!fi) {
-        perror(index);
-        exit(-1);
-    }
+    FILE *fi = open_file(index, "rb+");
 
     Header h;
     load_header(metadata, &h);
@@ -319,11 +301,7 @@ void imp(FILE *fp, uint32_t node_offset, uint8_t t, int andar) {
 }
 
 void tree_print(char *index, char *metadata) {
-    FILE *fi = fopen(index,"rb+");
-    if(!fi) {
-        perror(index);
-        exit(-1);
-    }
+    FILE *fi = open_file(index, "rb+");
 
     Header h;
     load_header(metadata, &h);
@@ -581,11 +559,7 @@ void tree_remove(char *index, char *metadata, uint32_t key) {
 
     uint32_t root = h.root;
     uint8_t t = h.t;
-    FILE *fp = fopen(index, "rb+");
-    if(!fp) {
-        perror("(perror) falha ao abrir arquivo de indices");
-        exit(EXIT_FAILURE);
-    }
+    FILE *fp = open_file(index, "rb+");
 
     aux_tree_remove(fp, metadata, root, key, t);
     fclose(fp);

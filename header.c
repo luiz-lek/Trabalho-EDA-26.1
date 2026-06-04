@@ -9,12 +9,7 @@
 #include <stdlib.h>
 
 void load_header(char *metadata_file, Header *h) {
-    FILE *fp = fopen(metadata_file, "rb");
-    if (!fp) {
-        perror("(fopen) erro ao abir arquivo de metadados para salvar header.");
-        exit(EXIT_FAILURE);
-    }
-
+    FILE *fp = open_file(metadata_file, "rb");
     load_data(fp, 0, h, HEADER_SIZE);
     fclose(fp);
 }

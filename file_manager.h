@@ -45,6 +45,8 @@ void movie_save(Movie *m, FILE *fp, uint32_t offset);
 bool load_data(FILE *fp, uint32_t offset, void *data, size_t size);
 bool save_data(FILE *fp, uint32_t offset, void *data, size_t size);
 
+FILE* open_file(const char *filename, const char *mode);
+
 uint32_t file_size(FILE *fp);
 
 #endif //TRABALHO_EDA_26_1_FILE_MANAGER_H
