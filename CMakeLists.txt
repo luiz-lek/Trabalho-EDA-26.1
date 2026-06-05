@@ -22,8 +22,6 @@ add_executable (
         src/header.c
         include/relationship.h
         src/relationship.c
-        src/person_tree.c
-        include/person_tree.h
-        include/movie_tree.h
-        src/movie_tree.c
+        src/data_structures_manipulation.c
+        include/data_structures_manipulation.h
 )

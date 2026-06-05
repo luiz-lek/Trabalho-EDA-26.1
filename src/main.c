@@ -4,8 +4,7 @@
 #include "../include/b_plus_tree.h"
 #include "../include/file_manager.h"
 #include "../include/importer.h"
-#include "../include/movie_tree.h"
-#include "../include/person_tree.h"
+#include "../include/data_structures_manipulation.h"
 #include "../include/relationship.h"
 
 int main() {

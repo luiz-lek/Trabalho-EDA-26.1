@@ -21,11 +21,14 @@ typedef struct {
     uint8_t relationship_type;
     uint32_t movie_id;
     char role[50];
+
+    uint32_t offset_next_person;
+    uint32_t offset_next_movie;
 } Relationship;
 
 
 RelationshipType parse_relationship_STRING(const char *string);
 
-void print_file_relationships();
+void print_relationships_file();
 
 #endif //TRABALHO_EDA_26_1_RELATIONSHIP_H

@@ -21,12 +21,18 @@
 #define PATH_RELATIONSHIPS "../requirements/Relationships.txt"
 
 #define PATH_HASH_MOVIE_TABLE "../data_base/hash/movie/table.dat"
-#define PATH_HASH_MOVIE_DATA "../data_base/hash/movie/data_base.dat"
+#define PATH_HASH_MOVIE_DATA "../data_base/hash/movie/data.dat"
 
 #define PATH_HASH_PERSON_TABLE "../data_base/hash/person/table.dat"
-#define PATH_HASH_PERSON_DATA "../data_base/hash/person/data_base.dat"
+#define PATH_HASH_PERSON_DATA "../data_base/hash/person/data.dat"
 
 #define PATH_RELATIONSHIPS_DATA "../data_base/tree/relationships.dat"
+
+#define PATH_HASH_MOVIE_RELATIONSHIP_TABLE "../data_base/hash/movie_relationship/table.dat"
+#define PATH_HASH_MOVIE_RELATIONSHIP_DATA "../data_base/hash/movie_relationship/data.dat"
+
+#define PATH_HASH_PERSON_RELATIONSHIP_TABLE "../data_base/hash/person_relationship/table.dat"
+#define PATH_HASH_PERSON_RELATIONSHIP_DATA "../data_base/hash/person_relationship/data.dat"
 
 #define DISK_NULL 0xFFFFFFFF
 

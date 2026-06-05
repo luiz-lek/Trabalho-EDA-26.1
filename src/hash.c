@@ -10,21 +10,8 @@
 
 #define TAM_BUFFER_SIZE 1024
 
-// djb2
-uint32_t hash(const char *str, uint32_t num_buckets) {
-    uint32_t hash = 5381;
-    int c;
-
-    while ((c = *str++)) {
-        hash = ((hash << 5) + hash) + c;
-    }
-    hash = hash % num_buckets;
-    // Retorna a posiçao já no arquivo
-    return hash * sizeof(uint32_t);
-}
-
-void hash_initialize(char *table, char *data, uint32_t num_buckets) {
-    FILE *fp = open_file(table, "wb");
+void hash_initialize(char *path_table, char *path_data, int num_buckets) {
+    FILE *fp = open_file(path_table, "wb");
     uint32_t buffer_ram[TAM_BUFFER_SIZE];
 
     for(int i = 0; i < TAM_BUFFER_SIZE; i++) buffer_ram[i] = DISK_NULL;
@@ -41,22 +28,25 @@ void hash_initialize(char *table, char *data, uint32_t num_buckets) {
     }
 
     fclose(fp);
-    fp = open_file(data, "wb");
+    fp = open_file(path_data, "wb");
     fclose(fp);
 }
 
-void hash_insert(char *table, char *data, uint32_t num_buckets, const char *string, uint32_t id) {
-    FILE *fph = open_file(table, "rb+");
-    FILE *fpd = open_file(data, "rb+");
+void hash_insert(char *path_table, char *path_data, int num_buckets,
+    Comparator comparator, HashFunction hash, void *key, uint32_t valor, size_t key_size) {
 
-    uint32_t h = hash(string, num_buckets);
+    FILE *fph = open_file(path_table, "rb+");
+    FILE *fpd = open_file(path_data, "rb+");
+
+    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
 
     uint32_t offset_list_head;
     read_data(fph, h, &offset_list_head, sizeof(uint32_t));
 
     HashData new_data;
-    new_data.id = id;
-    strcpy(new_data.name, string);
+    memset(&new_data.key, 0, sizeof(new_data.key));
+    memcpy(&new_data.key, key, key_size);
+    new_data.valor = valor;
     new_data.next = DISK_NULL;
     new_data.valid = 1;
 
@@ -76,7 +66,7 @@ void hash_insert(char *table, char *data, uint32_t num_buckets, const char *stri
         do {
             offset_last = offset_current;
             read_data(fpd, offset_current, &current, sizeof(HashData));
-            if(current.valid && strcmp(new_data.name, current.name) == 0) {
+            if(current.valid && comparator(&current.key, key)) {
                 data_found = true;
                 break;
             }
@@ -102,11 +92,12 @@ void hash_insert(char *table, char *data, uint32_t num_buckets, const char *stri
     fclose(fpd);
 }
 
-void remove_data(char *table, char *data, uint32_t num_buckets, const char *string) {
-    FILE *fph = open_file(table, "rb+");
-    FILE *fpd = open_file(data, "rb+");
+void hash_remove_data(char *path_table, char *path_data, int num_buckets,
+    Comparator comparator, HashFunction hash, void *key) {
+    FILE *fph = open_file(path_table, "rb+");
+    FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(string, num_buckets);
+    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
 
     HashData current;
     uint32_t offset_current;
@@ -115,7 +106,7 @@ void remove_data(char *table, char *data, uint32_t num_buckets, const char *stri
 
     while(offset_current != DISK_NULL) {
         read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && strcmp(current.name, string) == 0) {
+        if(current.valid && comparator(&current.key, key)) {
             current.valid = 0;
             write_data(fpd, offset_current, &current, sizeof(HashData));
             break;
@@ -126,11 +117,12 @@ void remove_data(char *table, char *data, uint32_t num_buckets, const char *stri
     fclose(fpd);
 }
 
-uint32_t get_id(char *table, char *data, uint32_t num_buckets, const char *string) {
-    FILE *fph = open_file(table, "rb+");
-    FILE *fpd = open_file(data, "rb+");
+uint32_t hash_get_value(char *path_table, char *path_data, int num_buckets,
+    Comparator comparator, HashFunction hash, void *key) {
+    FILE *fph = open_file(path_table, "rb+");
+    FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(string, num_buckets);
+    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
 
     HashData current;
     uint32_t offset_current;
@@ -139,13 +131,44 @@ uint32_t get_id(char *table, char *data, uint32_t num_buckets, const char *strin
 
     while(offset_current != DISK_NULL) {
         read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && strcmp(current.name, string) == 0) {
+        if(current.valid && comparator(&current.key, key)) {
             fclose(fpd);
-            return current.id;
+            return current.valor;
         }
         offset_current = current.next;
     }
 
     fclose(fpd);
     return DISK_NULL;
+}
+
+void hash_change_value(char *path_table, char *path_data, int num_buckets,
+    Comparator comparator, HashFunction hash, void *key, uint32_t new_value) {
+
+    FILE *fph = open_file(path_table, "rb+");
+    FILE *fpd = open_file(path_data, "rb+");
+
+    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
+
+    HashData current;
+    uint32_t offset_current;
+    read_data(fph, h, &offset_current, sizeof(uint32_t));
+    fclose(fph);
+
+    while(offset_current != DISK_NULL) {
+        read_data(fpd, offset_current, &current, sizeof(HashData));
+        if(current.valid && comparator(&current.key, key)) {
+            current.valor = new_value;
+            write_data(fpd, offset_current, &current, sizeof(HashData));
+            break;
+        }
+        offset_current = current.next;
+    }
+
+    fclose(fpd);
+}
+
+void hash_delete_hash(char *path_table, char *path_data) {
+    remove(path_table);
+    remove(path_data);
 }

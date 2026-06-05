@@ -19,7 +19,7 @@ RelationshipType parse_relationship_STRING(const char *string) {
     return 0;
 }
 
-void parser_STRING_relationship(const char *string, RelationshipType type) {
+void parser_STRING_relationship(char *string, RelationshipType type) {
     switch(type) {
         case ACTED_IN:
             strcpy(string, "ACTED_IN");
@@ -46,7 +46,7 @@ void print_relationship(Relationship *r) {
     }
 }
 
-void print_file_relationships() {
+void print_relationships_file() {
     FILE *fp = open_file(PATH_RELATIONSHIPS_DATA, "rb");
 
     Relationship r;
