@@ -10,7 +10,12 @@
 
 #define TAM_BUFFER_SIZE 1024
 
-void hash_initialize(char *path_table, char *path_data, int num_buckets) {
+uint32_t hash(const HashFunction generate_brute_number, const void *key, int num_buckets) {
+    const uint32_t brute_number = generate_brute_number(key);
+    return brute_number % num_buckets * sizeof(uint32_t);
+}
+
+void hash_initialize(const char *path_table, const char *path_data, int num_buckets) {
     FILE *fp = open_file(path_table, "wb");
     uint32_t buffer_ram[TAM_BUFFER_SIZE];
 
@@ -28,17 +33,16 @@ void hash_initialize(char *path_table, char *path_data, int num_buckets) {
     }
 
     fclose(fp);
-    fp = open_file(path_data, "wb");
-    fclose(fp);
+    create_file(path_data);
 }
 
-void hash_insert(char *path_table, char *path_data, int num_buckets,
-    Comparator comparator, HashFunction hash, void *key, uint32_t valor, size_t key_size) {
+void hash_insert(const char *path_table, const char *path_data, int num_buckets,
+    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t valor, size_t key_size) {
 
     FILE *fph = open_file(path_table, "rb+");
     FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
+    uint32_t h = hash(generate_brute_number, key, num_buckets);
 
     uint32_t offset_list_head;
     read_data(fph, h, &offset_list_head, sizeof(uint32_t));
@@ -92,12 +96,12 @@ void hash_insert(char *path_table, char *path_data, int num_buckets,
     fclose(fpd);
 }
 
-void hash_remove_data(char *path_table, char *path_data, int num_buckets,
-    Comparator comparator, HashFunction hash, void *key) {
+void hash_remove_data(const char *path_table, const char *path_data, int num_buckets,
+    Comparator comparator, HashFunction generate_brute_number, const void *key) {
     FILE *fph = open_file(path_table, "rb+");
     FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
+    uint32_t h = hash(generate_brute_number, key, num_buckets);
 
     HashData current;
     uint32_t offset_current;
@@ -117,12 +121,12 @@ void hash_remove_data(char *path_table, char *path_data, int num_buckets,
     fclose(fpd);
 }
 
-uint32_t hash_get_value(char *path_table, char *path_data, int num_buckets,
-    Comparator comparator, HashFunction hash, void *key) {
+uint32_t hash_get_value(const char *path_table, const char *path_data, int num_buckets,
+    Comparator comparator, HashFunction generate_brute_number, const void *key) {
     FILE *fph = open_file(path_table, "rb+");
     FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
+    uint32_t h = hash(generate_brute_number, key, num_buckets);
 
     HashData current;
     uint32_t offset_current;
@@ -142,13 +146,13 @@ uint32_t hash_get_value(char *path_table, char *path_data, int num_buckets,
     return DISK_NULL;
 }
 
-void hash_change_value(char *path_table, char *path_data, int num_buckets,
-    Comparator comparator, HashFunction hash, void *key, uint32_t new_value) {
+void hash_change_value(const char *path_table, const char *path_data, int num_buckets,
+    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t new_value) {
 
     FILE *fph = open_file(path_table, "rb+");
     FILE *fpd = open_file(path_data, "rb+");
 
-    uint32_t h = hash(key, num_buckets) * sizeof(uint32_t);
+    uint32_t h = hash(generate_brute_number, key, num_buckets);
 
     HashData current;
     uint32_t offset_current;
@@ -168,7 +172,7 @@ void hash_change_value(char *path_table, char *path_data, int num_buckets,
     fclose(fpd);
 }
 
-void hash_delete_hash(char *path_table, char *path_data) {
+void hash_delete_hash(const char *path_table, const char *path_data) {
     remove(path_table);
     remove(path_data);
 }

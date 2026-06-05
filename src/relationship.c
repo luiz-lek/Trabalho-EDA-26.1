@@ -5,7 +5,6 @@
 #include "../include/relationship.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "../include/file_manager.h"
@@ -19,7 +18,7 @@ RelationshipType parse_relationship_STRING(const char *string) {
     return 0;
 }
 
-void parser_STRING_relationship(char *string, RelationshipType type) {
+void parse_STRING_relationship(char *string, RelationshipType type) {
     switch(type) {
         case ACTED_IN:
             strcpy(string, "ACTED_IN");
@@ -35,19 +34,27 @@ void parser_STRING_relationship(char *string, RelationshipType type) {
     }
 }
 
+void relationship_initilize(Relationship *r) {
+    r->is_valid = true;
+    r->offset_next_movie = DISK_NULL;
+    r->offset_next_person = DISK_NULL;
+}
+
 void print_relationship(Relationship *r) {
     printf("\nRelacionamento\n");
 
     char relationship_type[20];
-    parser_STRING_relationship(relationship_type, r->relationship_type);
+    parse_STRING_relationship(relationship_type, r->relationship_type);
     printf("%d %s %d\n", r->person_id, relationship_type, r->movie_id);
     if(r->role[0] != '\0') {
         printf("Role: %s\n", r->role);
     }
+    printf("Proximo filme: %d\n"
+           "Próxima pessoa: %d\n", r->offset_next_movie, r->offset_next_person);
 }
 
 void print_relationships_file() {
-    FILE *fp = open_file(PATH_RELATIONSHIPS_DATA, "rb");
+    FILE *fp = open_file(PATH_RELATIONS_DATA, "rb+");
 
     Relationship r;
     uint32_t current = 0;

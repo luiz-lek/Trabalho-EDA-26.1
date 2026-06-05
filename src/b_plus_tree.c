@@ -3,14 +3,116 @@
 //
 
 #include "../include/b_plus_tree.h"
-#include "../include/header.h"
 #include "../include/file_manager.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 // Para a descidas reursivas, são carregados apenas os nós atual.
 // Assim que o nó não for mais necessário, ele é liberao da memória.
+// Lê os campos na ordem q estão declarados na struct do nó.
+
+bool tree_node_read(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+    if(offset == DISK_NULL) return false;
+
+    int keys_length = 2 * t - 1, child_length = 2 * t;
+
+    // Cálculo da quantidades de bytes que o nó ocupa
+    size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)
+                         + (keys_length * sizeof(uint32_t))
+                         + (child_length * sizeof(uint32_t))
+                         + sizeof(uint32_t);
+
+    uint8_t *buffer = malloc(buffer_size); // uint8_t porque cada índice do vetor aramazena 1 byte
+    if(!buffer) {
+        perror("(malloc) falha ao alocar buffer para leitura de nó.");
+        exit(-1);
+    }
+
+    bool read_success = read_data(fp, offset, buffer, buffer_size); // Lê todos o bytes da struct gravada no disco
+
+    if(!read_success) {
+        free(buffer);
+        return false;
+    }
+
+    uint32_t pos = 0;
+
+    // Copia os bytes de is_leaf do buffer
+    memcpy(&node->is_leaf, buffer + pos, sizeof(uint8_t));
+    pos += sizeof(uint8_t);
+
+    // Copia os bytes de num_keys do buffer
+    memcpy(&node->num_keys, buffer + pos, sizeof(uint16_t));
+    pos += sizeof(uint16_t);
+
+    // Copia os bytes do vetor de chaves
+    memcpy(node->key, buffer + pos, sizeof(uint32_t) * keys_length);
+    pos += sizeof(uint32_t) * keys_length;
+
+    // Copia o vetor de offsets
+    memcpy(node->offset, buffer + pos, sizeof(uint32_t) * child_length);
+    pos += sizeof(uint32_t) * child_length;
+
+    // Copia o offset do proximo
+    memcpy(&node->next, buffer + pos, sizeof(uint32_t));
+
+    free(buffer);
+    return true;
+}
+
+// Mesma lógica de cima, mas pra escrita
+void tree_node_write(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
+    int keys_length = 2 * t - 1, child_length = 2 * t;
+    size_t buffer_size = sizeof(uint8_t) + sizeof(uint16_t)
+                         + (keys_length * sizeof(uint32_t))
+                         + (child_length * sizeof(uint32_t))
+                         + sizeof(uint32_t);
+
+    uint8_t *buffer = malloc(buffer_size);
+    if(!buffer) {
+        perror("(malloc) falha ao alocar buffer para escrita de nó.");
+        exit(-1);
+    }
+
+    uint32_t pos = 0; // Marca o offset pro inicio do novo bloco de escrita
+
+    // Escreve no buffer os bytes de is_leaf
+    memcpy(buffer + pos, &node->is_leaf, sizeof(uint8_t));
+    pos += sizeof(uint8_t);
+
+    // Escreve no buffer os bytes de num_chaves
+    memcpy(buffer + pos, &node->num_keys, sizeof(uint16_t));
+    pos += sizeof(uint16_t);
+
+    // Escreve no buffer os bytes do vetor de chaves
+    memcpy(buffer + pos, node->key,  sizeof(uint32_t) * keys_length);
+    pos += sizeof(uint32_t) * keys_length;
+
+    // Escreve no buffer os bytes vetor de offsets
+    memcpy(buffer + pos, node->offset,  sizeof(uint32_t) * child_length);
+    pos += sizeof(uint32_t) * child_length;
+
+    // Escreve no buffer os bytes do offset do proximo
+    memcpy(buffer + pos, &node->next, sizeof(uint32_t));
+
+    // Grava o buffer com todos os bytes de node
+    write_data(fp, offset, buffer, buffer_size);
+    free(buffer);
+}
+
+void load_header(const char *metadata_file, Header *h) {
+    FILE *fp = open_file(metadata_file, "rb");
+    read_data(fp, 0, h, sizeof(Header));
+    fclose(fp);
+}
+
+void save_header(const char *metadata_file, Header *h) {
+    FILE *fp = open_file(metadata_file, "wb");
+    write_data(fp, 0, h, sizeof(Header));
+    fclose(fp);
+}
 
 void tree_initialize(uint8_t t, char *index, char *data, char *metadata) {
     FILE *file = open_file(index, "wb");

@@ -19,6 +19,7 @@ typedef enum {
 typedef struct {
     uint32_t person_id;
     uint8_t relationship_type;
+    uint8_t is_valid;
     uint32_t movie_id;
     char role[50];
 
@@ -28,7 +29,7 @@ typedef struct {
 
 
 RelationshipType parse_relationship_STRING(const char *string);
-
+void relationship_initilize(Relationship *r);
 void print_relationships_file();
 
 #endif //TRABALHO_EDA_26_1_RELATIONSHIP_H

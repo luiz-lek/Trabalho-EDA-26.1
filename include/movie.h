@@ -5,7 +5,7 @@
 #ifndef TRABALHO_EDA_26_1_MOVIE_H
 #define TRABALHO_EDA_26_1_MOVIE_H
 
-#define TITLE_LENGTH 30
+#define TITLE_LENGTH 50
 #define SUB_TITLE_LENGTH 200
 
 #include <stdint.h>
@@ -15,8 +15,6 @@ typedef struct {
     char subtitle[SUB_TITLE_LENGTH];
     uint16_t year;
 } Movie;
-
-#define MOVIE_SIZE sizeof(Movie)
 
 Movie* movie_allocate();
 void movie_copy(Movie *dest, Movie *src);

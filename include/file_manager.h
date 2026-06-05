@@ -1,64 +1,61 @@
-//
-// Created by luizao on 29/05/2026.
-//
-
 #ifndef TRABALHO_EDA_26_1_FILE_MANAGER_H
 #define TRABALHO_EDA_26_1_FILE_MANAGER_H
 
-#define PATH_METADATA_PERSON_TREE "../data_base/tree/person/metadata.dat"
-#define PATH_METADATA_MOVIE_TREE "../data_base/tree/movie/metadata.dat"
-
-#define PATH_INDEX_PERSON_TREE "../data_base/tree/person/index.dat"
-#define PATH_INDEX_MOVIE_TREE "../data_base/tree/movie/index.dat"
-
-#define PATH_DATA_PERSON_TREE "../data_base/tree/person/data_base.dat"
-#define PATH_DATA_MOVIE_TREE "../data_base/tree/movie/data_base.dat"
-
-#define PATH_INDEX_PERSON_TREE "../data_base/tree/person/index.dat"
-#define PATH_INDEX_MOVIE_TREE "../data_base/tree/movie/index.dat"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define PATH_NODES "../requirements/Nodes.txt"
 #define PATH_RELATIONSHIPS "../requirements/Relationships.txt"
 
-#define PATH_HASH_MOVIE_TABLE "../data_base/hash/movie/table.dat"
-#define PATH_HASH_MOVIE_DATA "../data_base/hash/movie/data.dat"
+// Arquivos árvore de pessoas
+#define PATH_INDEX_PERSON_TREE "../data_base/tree/person/index.dat"
+#define PATH_DATA_PERSON_TREE "../data_base/tree/person/data.dat"
+#define PATH_METADATA_PERSON_TREE "../data_base/tree/person/metadata.dat"
 
-#define PATH_HASH_PERSON_TABLE "../data_base/hash/person/table.dat"
-#define PATH_HASH_PERSON_DATA "../data_base/hash/person/data.dat"
+// Arquivos árvore de filmes
+#define PATH_INDEX_MOVIE_TREE "../data_base/tree/movie/index.dat"
+#define PATH_DATA_MOVIE_TREE "../data_base/tree/movie/data.dat"
+#define PATH_METADATA_MOVIE_TREE "../data_base/tree/movie/metadata.dat"
 
-#define PATH_RELATIONSHIPS_DATA "../data_base/tree/relationships.dat"
 
-#define PATH_HASH_MOVIE_RELATIONSHIP_TABLE "../data_base/hash/movie_relationship/table.dat"
-#define PATH_HASH_MOVIE_RELATIONSHIP_DATA "../data_base/hash/movie_relationship/data.dat"
 
-#define PATH_HASH_PERSON_RELATIONSHIP_TABLE "../data_base/hash/person_relationship/table.dat"
-#define PATH_HASH_PERSON_RELATIONSHIP_DATA "../data_base/hash/person_relationship/data.dat"
+
+
+//Arquivo de relacionamentos
+#define PATH_RELATIONS_DATA "../data_base/tree/relations.dat"
+
+
+
+
+
+// Arquivos da hash que relaciona o nome do filme com seu id
+#define PATH_HASH_MOVIE_TO_ID_TABLE "../data_base/hash/movie_to_id/table.dat"
+#define PATH_HASH_MOVIE_TO_ID_DATA "../data_base/hash/movie_to_id/data.dat"
+
+// Arquivos da hash que relaciona o nome da pessoa com seu id
+#define PATH_HASH_PERSON_TO_ID_TABLE "../data_base/hash/person_to_id/table.dat"
+#define PATH_HASH_PERSON_TO_ID_DATA "../data_base/hash/person_to_id/data.dat"
+
+// Arquivos da hash que relaciona o id do filme com a lista de pessoas participantes
+#define PATH_HASH_MOVIE_TO_PERSON_TABLE "../data_base/hash/movie_to_person/table.dat"
+#define PATH_HASH_MOVIE_TO_PERSON_DATA "../data_base/hash/movie_to_person/data.dat"
+
+// Arquivo que relaciona o id da pessoa com a lista de filmes que ela participou
+#define PATH_HASH_PERSON_TO_MOVIE_TABLE "../data_base/hash/person_to_movie/table.dat"
+#define PATH_HASH_PERSON_TO_MOVIE_DATA "../data_base/hash/person_to_movie/data.dat"
+
+
 
 #define DISK_NULL 0xFFFFFFFF
 
-#include "person.h"
-#include "b_plus_tree.h"
-
-#include <stdio.h>
-#include <stdbool.h>
-
-#include "movie.h"
-
-bool tree_node_read(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
-void tree_node_write(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
-
-void person_write(Person *p, FILE *fp, uint32_t offset);
-void person_read(Person *person, FILE *fp, uint32_t offset);
-
-void movie_read(Movie *m, FILE *fp, uint32_t offset);
-void movie_write(Movie *m, FILE *fp, uint32_t offset);
-
 // Carrega structs genérica do arquivo de dados
-bool read_data(FILE *fp, uint32_t offset, void *data, size_t size);
-bool write_data(FILE *fp, uint32_t offset, void *data, size_t size);
+bool read_data(FILE *fp, uint32_t offset,  void *data, size_t size);
+bool write_data(FILE *fp, uint32_t offset, const void *data, size_t size);
 
-FILE* open_file(const char *filename, const char *mode);
+FILE* open_file(const char *file_name, const char *mode);
 
 uint32_t file_size(FILE *fp);
+void create_file(const char *file_name);
 
 #endif //TRABALHO_EDA_26_1_FILE_MANAGER_H

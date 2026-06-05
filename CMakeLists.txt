@@ -18,10 +18,10 @@ add_executable (
         include/movie.h
         include/hash.h
         src/hash.c
-        include/header.h
-        src/header.c
         include/relationship.h
         src/relationship.c
         src/data_structures_manipulation.c
         include/data_structures_manipulation.h
+        src/teste.c
+        include/teste.h
 )

@@ -3,16 +3,12 @@
 //
 
 #include "../include/importer.h"
-#include "../include/hash.h"
-#include "../include/person.h"
 #include "../include/file_manager.h"
+#include "../include/person.h"
 #include "../include/movie.h"
-#include "../include/relationship.h"
 #include "../include/data_structures_manipulation.h"
 
 #include <string.h>
-
-
 
 void trim(char* str) {
     if(!str) return;
@@ -27,7 +23,7 @@ void trim(char* str) {
     if(inicio > 0) memmove(str, str + inicio, len - inicio + 1);
 }
 
-uint16_t str_to_uint16(char* line) {
+uint16_t str_to_uint16(const char* line) {
     uint16_t ano = 0;
     int i = 0;
     while(line[i] != '\0') {
@@ -87,8 +83,8 @@ void import_movies_and_persons(uint8_t t) {
     movie_tree_initialize(t);
     person_tree_initialize(t);
 
-    hash_person_id_initialize();
-    hash_movie_id_initialize();
+    hash_person_to_id_initialize();
+    hash_movie_to_id_initialize();
 
     FILE *movie_data = open_file(PATH_DATA_MOVIE_TREE, "wb");
     FILE *person_data = open_file(PATH_DATA_PERSON_TREE, "wb");
@@ -109,8 +105,8 @@ void import_movies_and_persons(uint8_t t) {
             fill_person(&p, buffer);
 
             offset_person_data = file_size(person_data);
-            person_write(&p, person_data, offset_person_data);
-            hash_person_id_insert(p.name, person_id);
+            write_data(person_data, offset_person_data, &p, sizeof(Person));
+            hash_person_to_id_insert(p.name, person_id);
             person_tree_insert(person_id, offset_person_data);
         }
         if(buffer[0] == 'M') {
@@ -118,8 +114,8 @@ void import_movies_and_persons(uint8_t t) {
             fill_movie(&m, buffer);
 
             offset_movie_data = file_size(movie_data);
-            movie_write(&m, movie_data, offset_movie_data);
-            hash_movie_id_insert(m.title, movie_id);
+            write_data(movie_data, offset_movie_data, &m, sizeof(Movie));
+            hash_movie_to_id_insert(m.title, movie_id);
             movie_tree_insert(movie_id, offset_movie_data);
         }
     }
@@ -128,32 +124,35 @@ void import_movies_and_persons(uint8_t t) {
     fclose(person_data);
 }
 
-void import_relationships(uint8_t t) {
+void import_relationships() {
     FILE *fp = open_file(PATH_RELATIONSHIPS, "r");
-    FILE *fr = open_file(PATH_RELATIONSHIPS_DATA, "wb");
 
-    hash_person_relation_initialize();
-    hash_movie_relation_initialize();
+    create_file(PATH_RELATIONS_DATA);
+
+    hash_person_to_movie_initialize();
+    hash_movie_to_person_initialize();
 
     char line[LINE_LENGTH];
     char token_buffer[LINE_LENGTH];
     Relationship relationship;
 
     while(fgets(line, LINE_LENGTH, fp) != NULL) {
+        relationship_initilize(&relationship);
         line[strcspn(line, "\n")] = '\0';
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = hash_person_id_get_value(token_buffer);
+        relationship.person_id = hash_person_to_id_get_value(token_buffer);
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = hash_movie_id_get_value(token_buffer);
+        relationship.movie_id = hash_movie_to_id_get_value(token_buffer);
 
-        if(relationship.relationship_type == ACTED_IN) { // Só tem papel se for relação do tipo atuação
+        // Só tem papel se for relação do tipo atuação
+        if(relationship.relationship_type == ACTED_IN) {
             jump_token(line, ':');
             get_token_formated(line, token_buffer, '|');
             strcpy(relationship.role, token_buffer);
@@ -161,15 +160,14 @@ void import_relationships(uint8_t t) {
             relationship.role[0] = '\0';
         }
 
-        uint32_t end_file = file_size(fr);
-        write_data(fr, end_file, &relationship, RELATIONSHIP_SIZE);
+        // Insere no arquivo de relacionamento com as listas encadeadas de folme pra pessoa e pessoa pra filme
+        insert_relation(&relationship);
     }
 
     fclose(fp);
-    fclose(fr);
 }
 
 void import_data(uint8_t t) {
     import_movies_and_persons(t);
-    import_relationships(t);
+    import_relationships();
 }
