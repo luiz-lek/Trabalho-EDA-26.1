@@ -1,45 +1,36 @@
 //
-// Created by luizao on 01/06/2026.
+// Created by luizao on 06/06/2026.
 //
 
 #ifndef TRABALHO_EDA_26_1_HASH_H
 #define TRABALHO_EDA_26_1_HASH_H
 
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef int (HashFunction)(const void *key);
+typedef bool (*CompareFunction)(const void *a, const void *b);
+
 #define TAM_HASH 101
 
-#define KEY_STR_LENGTH 50
+typedef struct hash {
+    void *key;
+    void *value;
+    struct hash *next;
+} HashList;
 
-#include <stdint.h>
-#include <string.h>
+typedef HashList* TH[TAM_HASH];
 
-typedef uint8_t (*Comparator)(const void *a, const void *b);
-typedef uint32_t (*HashFunction)(const void *key);
+int hash(int num);
+HashList* hash_list_create();
+void hash_inicilize(TH table);
 
-typedef struct {
-    union {
-        char as_string[KEY_STR_LENGTH];
-        uint32_t as_id;
-    } key;
+void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
+    const void *key, size_t key_size, const void *value, size_t value_size);
 
-    uint32_t valor ;
-    uint32_t next;
-    uint8_t valid;
-} HashData;
+void hash_update_valor(TH table, HashFunction generate_number, CompareFunction equal, const void *key, const void *value, size_t value_size);
 
-void hash_initialize(const char *path_table, const char *path_data, int num_buckets);
+void hash_remove(TH table, HashFunction generate_number, CompareFunction equal, const void *key);
+void hash_destroy(TH table);
 
-void hash_insert(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t value, size_t key_size);
-
-void hash_remove_data(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key);
-
-uint32_t hash_get_value(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key);
-
-void hash_change_value(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t new_value);
-
-void hash_delete_hash(const char *path_table, const char *path_data);
-
-#endif //TRABALHO_EDA_26_1_HASH
+#endif //TRABALHO_EDA_26_1_HASH_H

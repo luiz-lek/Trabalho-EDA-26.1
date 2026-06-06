@@ -5,7 +5,7 @@
 #include "../include/data_structures_manipulation.h"
 #include "../include/file_manager.h"
 #include "../include/b_plus_tree.h"
-#include "../include/hash.h"
+#include "../include/hash_disk.h"
 #include "../include/person.h"
 #include "../include/movie.h"
 
@@ -92,28 +92,28 @@ void movie_tree_delete_base() {
 
 
 void hash_movie_to_id_initialize() {
-    hash_initialize(PATH_HASH_MOVIE_TO_ID_TABLE,
+    hash_disk_initialize(PATH_HASH_MOVIE_TO_ID_TABLE,
         PATH_HASH_MOVIE_TO_ID_DATA,TAM_HASH);
 }
 
 void hash_movie_to_id_insert(const char *movie_name, uint32_t movie_id) {
-    hash_insert(PATH_HASH_MOVIE_TO_ID_TABLE,
+    hash_disk_insert(PATH_HASH_MOVIE_TO_ID_TABLE,
     PATH_HASH_MOVIE_TO_ID_DATA, TAM_HASH, compare_str, hash_string,
     (void*)movie_name, movie_id, NAME_LENGTH);
 }
 
 void hash_movie_to_id_remove(const char *movie_name) {
-    hash_remove_data(PATH_HASH_MOVIE_TO_ID_TABLE,PATH_HASH_MOVIE_TO_ID_DATA, TAM_HASH,
+    hash_disk_remove_data(PATH_HASH_MOVIE_TO_ID_TABLE,PATH_HASH_MOVIE_TO_ID_DATA, TAM_HASH,
         compare_str, hash_string, (void*)movie_name);
 }
 
 uint32_t hash_movie_to_id_get_value(const char *movie_name) {
-    return hash_get_value(PATH_HASH_MOVIE_TO_ID_TABLE,PATH_HASH_MOVIE_TO_ID_DATA, TAM_HASH,
+    return hash_disk_get_value(PATH_HASH_MOVIE_TO_ID_TABLE,PATH_HASH_MOVIE_TO_ID_DATA, TAM_HASH,
         compare_str, hash_string, (void*)movie_name);
 }
 
 void hash_movie_to_id_delete_table() {
-    hash_delete_hash(PATH_HASH_MOVIE_TO_ID_TABLE, PATH_HASH_MOVIE_TO_ID_DATA);
+    hash_disk_delete_table(PATH_HASH_MOVIE_TO_ID_TABLE, PATH_HASH_MOVIE_TO_ID_DATA);
 }
 
 
@@ -121,26 +121,26 @@ void hash_movie_to_id_delete_table() {
 
 
 void hash_person_to_id_initialize() {
-    hash_initialize(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH);
+    hash_disk_initialize(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH);
 }
 
 void hash_person_to_id_insert(const char *name, uint32_t person_id) {
-    hash_insert(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH,
+    hash_disk_insert(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH,
         compare_str, hash_string, (void*)name, person_id, NAME_LENGTH);
 }
 
 void hash_person_to_id_remove(const char *name) {
-    hash_remove_data(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH,
+    hash_disk_remove_data(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA, TAM_HASH,
         compare_str, hash_string, (void*)name);
 }
 
 uint32_t hash_person_to_id_get_value(const char *name) {
-    return hash_get_value(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA,TAM_HASH,
+    return hash_disk_get_value(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA,TAM_HASH,
     compare_str, hash_string, (void*)name);
 }
 
 void hash_person_to_id_delete_table() {
-    hash_delete_hash(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA);
+    hash_disk_delete_table(PATH_HASH_PERSON_TO_ID_TABLE, PATH_HASH_PERSON_TO_ID_DATA);
 }
 
 
@@ -148,32 +148,32 @@ void hash_person_to_id_delete_table() {
 
 
 void hash_movie_to_person_initialize() {
-    hash_initialize(PATH_HASH_MOVIE_TO_PERSON_TABLE,
+    hash_disk_initialize(PATH_HASH_MOVIE_TO_PERSON_TABLE,
         PATH_HASH_MOVIE_TO_PERSON_DATA,TAM_HASH);
 }
 
 void hash_movie_to_person_insert(uint32_t id, uint32_t offset_relation_head) {
-    hash_insert(PATH_HASH_MOVIE_TO_PERSON_TABLE, PATH_HASH_MOVIE_TO_PERSON_DATA,
+    hash_disk_insert(PATH_HASH_MOVIE_TO_PERSON_TABLE, PATH_HASH_MOVIE_TO_PERSON_DATA,
         TAM_HASH, compare_int, hash_int, &id, offset_relation_head, sizeof(uint32_t));
 }
 
 void hash_movie_to_person_change_value(uint32_t id, uint32_t new_realation_head) {
-    hash_change_value(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
+    hash_disk_change_value(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
         TAM_HASH,compare_int, hash_int, &id, new_realation_head);
 }
 
 uint32_t hash_movie_to_person_get_value(uint32_t id) {
-    return hash_get_value(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
+    return hash_disk_get_value(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
         TAM_HASH, compare_int, hash_int, &id);
 }
 
 void hash_movie_to_person_remove(uint32_t id) {
-    hash_remove_data(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
+    hash_disk_remove_data(PATH_HASH_MOVIE_TO_PERSON_TABLE,PATH_HASH_MOVIE_TO_PERSON_DATA,
         TAM_HASH, compare_int, hash_int, &id);
 }
 
 void hash_movie_to_person_delete_table() {
-    hash_delete_hash(PATH_HASH_MOVIE_TO_PERSON_TABLE, PATH_HASH_MOVIE_TO_PERSON_DATA);
+    hash_disk_delete_table(PATH_HASH_MOVIE_TO_PERSON_TABLE, PATH_HASH_MOVIE_TO_PERSON_DATA);
 }
 
 
@@ -181,35 +181,35 @@ void hash_movie_to_person_delete_table() {
 
 
 void hash_person_to_movie_initialize() {
-    hash_initialize(PATH_HASH_PERSON_TO_MOVIE_TABLE,
+    hash_disk_initialize(PATH_HASH_PERSON_TO_MOVIE_TABLE,
         PATH_HASH_PERSON_TO_MOVIE_DATA,TAM_HASH);
 }
 
 void hash_person_to_movie_insert(uint32_t id, uint32_t offset_relatin_head) {
-    hash_insert(PATH_HASH_PERSON_TO_MOVIE_TABLE, PATH_HASH_PERSON_TO_MOVIE_DATA, TAM_HASH,
+    hash_disk_insert(PATH_HASH_PERSON_TO_MOVIE_TABLE, PATH_HASH_PERSON_TO_MOVIE_DATA, TAM_HASH,
         compare_int, hash_int, &id, offset_relatin_head, sizeof(uint32_t));
 }
 
 void hash_person_to_movie_change_value(uint32_t id, uint32_t new_realation_head) {
-    hash_change_value(PATH_HASH_PERSON_TO_MOVIE_TABLE,
+    hash_disk_change_value(PATH_HASH_PERSON_TO_MOVIE_TABLE,
         PATH_HASH_PERSON_TO_MOVIE_DATA, TAM_HASH,
         compare_int, hash_int, &id, new_realation_head);
 }
 
 uint32_t hash_person_to_movie_get_value(uint32_t id) {
-    return hash_get_value(PATH_HASH_PERSON_TO_MOVIE_TABLE,
+    return hash_disk_get_value(PATH_HASH_PERSON_TO_MOVIE_TABLE,
         PATH_HASH_PERSON_TO_MOVIE_DATA, TAM_HASH,
         compare_int, hash_int, &id);
 }
 
 void hash_person_to_movie_remove(uint32_t id) {
-    hash_remove_data(PATH_HASH_PERSON_TO_MOVIE_TABLE,
+    hash_disk_remove_data(PATH_HASH_PERSON_TO_MOVIE_TABLE,
         PATH_HASH_PERSON_TO_MOVIE_DATA, TAM_HASH,
         compare_int, hash_int, &id);
 }
 
 void hash_person_to_movie_delete_table() {
-    hash_delete_hash(PATH_HASH_PERSON_TO_MOVIE_TABLE, PATH_HASH_PERSON_TO_MOVIE_DATA);
+    hash_disk_delete_table(PATH_HASH_PERSON_TO_MOVIE_TABLE, PATH_HASH_PERSON_TO_MOVIE_DATA);
 }
 
 

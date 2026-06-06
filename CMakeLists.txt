@@ -16,12 +16,18 @@ add_executable (
         src/importer.c
         src/movie.c
         include/movie.h
-        include/hash.h
-        src/hash.c
+        include/hash_disk.h
+        src/hash_disk.c
         include/relationship.h
         src/relationship.c
         src/data_structures_manipulation.c
         include/data_structures_manipulation.h
         src/teste.c
         include/teste.h
+        src/resposta_questoes.c
+        include/resposta_questoes.h
+        include/hash.h
+        src/hash.c
+        src/hash_manipulation.c
+        include/hash_manipulation.h
 )

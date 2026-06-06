@@ -1,178 +1,113 @@
-//
-// Created by luizao on 01/06/2026.
-//
-
 #include "../include/hash.h"
-#include "../include/file_manager.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define TAM_BUFFER_SIZE 1024
-
-uint32_t hash(const HashFunction generate_brute_number, const void *key, int num_buckets) {
-    const uint32_t brute_number = generate_brute_number(key);
-    return brute_number % num_buckets * sizeof(uint32_t);
+int hash(int num) {
+    return num % TAM_HASH;
 }
 
-void hash_initialize(const char *path_table, const char *path_data, int num_buckets) {
-    FILE *fp = open_file(path_table, "wb");
-    uint32_t buffer_ram[TAM_BUFFER_SIZE];
-
-    for(int i = 0; i < TAM_BUFFER_SIZE; i++) buffer_ram[i] = DISK_NULL;
-
-    uint32_t num_buckets_wrote = 0;
-
-    while(num_buckets_wrote < num_buckets) {
-        uint32_t to_write = num_buckets - num_buckets_wrote;
-        if(to_write > TAM_BUFFER_SIZE) to_write = TAM_BUFFER_SIZE;
-
-        fwrite(buffer_ram, sizeof(uint32_t), to_write, fp);
-
-        num_buckets_wrote += to_write;
+HashList* hash_list_create(size_t key_size, size_t value_size) {
+    HashList *new = malloc(sizeof(HashList));
+    if(!new) {
+        perror("Falha ao alocar hash_list");
+        exit(EXIT_FAILURE);
     }
 
-    fclose(fp);
-    create_file(path_data);
+    new->key = malloc(key_size);
+    new->value = malloc(value_size);
+    if(!new->value || !new->key) {
+        perror("Falha ao alocar hash_list");
+        exit(EXIT_FAILURE);
+    }
+    new->next = NULL;
+    return new;
 }
 
-void hash_insert(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t valor, size_t key_size) {
+HashList* hash_list_destroy(HashList *hash_list) {
+    free(hash_list->key);
+    free(hash_list->value);
+    free(hash_list);
+    return NULL;
+}
 
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
+void hash_inicilize(TH table) {
+    for (int i = 0; i < TAM_HASH; i++) table[i] = NULL;
+}
 
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
+void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
+    const void *key, size_t key_size, const void *value, size_t value_size) {
 
-    uint32_t offset_list_head;
-    read_data(fph, h, &offset_list_head, sizeof(uint32_t));
+    int brute_number = generate_number(key);
+    int h = hash(brute_number);
 
-    HashData new_data;
-    memset(&new_data.key, 0, sizeof(new_data.key));
-    memcpy(&new_data.key, key, key_size);
-    new_data.valor = valor;
-    new_data.next = DISK_NULL;
-    new_data.valid = 1;
+    HashList *current = table[h];
 
+    while(current != NULL) {
+        // Não permite chaves repetidas
+        if(equal(current->key, key)) return;
+        current = current->next;
+    }
 
-    // Ainda não foi inserido nenhum elemento no bucket
-    if(offset_list_head == DISK_NULL) {
-        uint32_t offset_new_data = file_size(fpd);
-        write_data(fph, h, &offset_new_data, sizeof(uint32_t));
-        write_data(fpd, offset_new_data, &new_data, sizeof(HashData));
-    } else {
-        HashData current;
-        uint32_t offset_current = offset_list_head, offset_last = DISK_NULL;
-        uint32_t offset_first_free_position = DISK_NULL;
+    HashList *head = table[h];
+    HashList *new = hash_list_create(key_size, value_size);
 
-        // Busca de espaço livre e se o elemento já tá na hash.
-        bool data_found = 0;
-        do {
-            offset_last = offset_current;
-            read_data(fpd, offset_current, &current, sizeof(HashData));
-            if(current.valid && comparator(&current.key, key)) {
-                data_found = true;
-                break;
+    memcpy(new->key, key, key_size);
+    memcpy(new->value, value, value_size);
+    new->next = head;
+    table[h] = new;
+}
+
+void hash_update_valor(TH table, HashFunction generate_number, CompareFunction equal, const void *key, const void *value, size_t value_size) {
+    int brute_number = generate_number(key);
+    int h = hash(brute_number);
+
+    HashList *current = table[h];
+    while(current != NULL && !equal(current->key, key)) current = current->next;
+
+    // Chave não encontrada
+    if(!current) return;
+
+    memcpy(current->value, value, value_size);
+}
+
+void hash_remove(TH table, HashFunction generate_number, CompareFunction equal, const void *key) {
+    int brute_number = generate_number(key);
+    int h = hash(brute_number);
+
+    HashList *current = table[h];
+    HashList *prev = NULL;
+
+    if(!current) return;
+    if(equal(current->key, key)) {
+        prev = current;
+        current = current->next;
+        prev = hash_list_destroy(prev);
+        table[h] = current;
+        return;
+    }
+
+    while((current != NULL) && !equal(current->key, key)) {
+        prev = current;
+        current = current->next;
+    }
+
+    if(current == NULL) return;
+
+    prev->next = current->next;
+    current = hash_list_destroy(current);
+}
+
+void hash_destroy(TH table) {
+    for(int i = 0; i < TAM_HASH; i++) {
+        if(table[i]) {
+            HashList *current = table[i], *temp = NULL;
+            while(current != NULL) {
+                temp = current;
+                current = current->next;
+                temp = hash_list_destroy(temp);
             }
-            if(offset_first_free_position == DISK_NULL && !current.valid) {
-                offset_first_free_position = offset_current;
-                new_data.next = current.next;
-            }
-            offset_current = current.next;
-        } while(offset_current != DISK_NULL);
-
-        // O nome ainda não tá na hash e pode ser inserido
-        if(!data_found) {
-            if(offset_first_free_position == DISK_NULL) {
-                offset_first_free_position = file_size(fpd);
-                current.next = offset_first_free_position;
-                write_data(fpd, offset_last, &current, sizeof(HashData));
-            }
-            write_data(fpd, offset_first_free_position, &new_data, sizeof(HashData));
         }
     }
-
-    fclose(fph);
-    fclose(fpd);
-}
-
-void hash_remove_data(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key) {
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
-
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
-    uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
-
-    while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
-            current.valid = 0;
-            write_data(fpd, offset_current, &current, sizeof(HashData));
-            break;
-        }
-        offset_current = current.next;
-    }
-
-    fclose(fpd);
-}
-
-uint32_t hash_get_value(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key) {
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
-
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
-    uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
-
-    while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
-            fclose(fpd);
-            return current.valor;
-        }
-        offset_current = current.next;
-    }
-
-    fclose(fpd);
-    return DISK_NULL;
-}
-
-void hash_change_value(const char *path_table, const char *path_data, int num_buckets,
-    Comparator comparator, HashFunction generate_brute_number, const void *key, uint32_t new_value) {
-
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
-
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
-    uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
-
-    while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
-            current.valor = new_value;
-            write_data(fpd, offset_current, &current, sizeof(HashData));
-            break;
-        }
-        offset_current = current.next;
-    }
-
-    fclose(fpd);
-}
-
-void hash_delete_hash(const char *path_table, const char *path_data) {
-    remove(path_table);
-    remove(path_data);
 }

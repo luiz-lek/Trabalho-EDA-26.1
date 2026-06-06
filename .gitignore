@@ -21,6 +21,5 @@
 *.db
 
 # ro7 n pode
-TARVBM.c
 /src/teste.c
 /include/teste.h
