@@ -8,29 +8,27 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef int (HashFunction)(const void *key);
+typedef int (*HashFunction)(const void *key);
 typedef bool (*CompareFunction)(const void *a, const void *b);
-
-#define TAM_HASH 101
+typedef void (*PrintFunction)(const void *key, const void *valor);
 
 typedef struct hash {
     void *key;
     void *value;
     struct hash *next;
-} HashList;
+} HashNode;
 
-typedef HashList* TH[TAM_HASH];
+int hash(int num, int table_size);
+HashNode** hash_inicialize(HashNode** table, int table_size);
 
-int hash(int num);
-HashList* hash_list_create();
-void hash_inicilize(TH table);
-
-void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
+void hash_insert(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal,
     const void *key, size_t key_size, const void *value, size_t value_size);
 
-void hash_update_valor(TH table, HashFunction generate_number, CompareFunction equal, const void *key, const void *value, size_t value_size);
+void hash_update_valor(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal, const void *key, const void *value, size_t value_size);
 
-void hash_remove(TH table, HashFunction generate_number, CompareFunction equal, const void *key);
-void hash_destroy(TH table);
+void hash_remove(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal, const void *key);
+void hash_destroy(HashNode** table, int table_size);
+
+void hash_print(HashNode** table, int table_size, PrintFunction print);
 
 #endif //TRABALHO_EDA_26_1_HASH_H

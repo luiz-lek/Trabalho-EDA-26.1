@@ -5,6 +5,7 @@
 #ifndef TRABALHO_EDA_26_1_DATABASE_H
 #define TRABALHO_EDA_26_1_DATABASE_H
 
+#include <stdio.h>
 #include <stdint.h>
 
 typedef struct {
@@ -15,20 +16,22 @@ typedef struct {
     uint32_t next; // Se for folha
 } TreeNode;
 
-void tree_initialize(uint8_t t, char *index, char *data, char *metadata);
-uint32_t tree_search(char *index, char *metadata, uint32_t key);
-void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data);
-void tree_remove(char *index, char *metadata, uint32_t key);
-void tree_print(char *index, char *metadata);
-
 typedef struct {
+    uint32_t root, first_leaf, last_id_generated;
     uint8_t t;
-    uint32_t root;
-    uint32_t first_leaf;
-    uint32_t last_id_generated;
 } Header;
 
-void load_header(const char *metadata_file, Header *h);
-void save_header(const char *metadata_file, Header *h);
+typedef struct {
+    Header header;
+    FILE *fp_index,
+         *fp_metadata,
+         *fp_data;
+} TreeContext;
+
+void tree_initialize(uint8_t t, const char *index, const char *data, const char *metadata);
+uint32_t tree_search(const TreeContext *ctx, uint32_t key);
+void tree_insert(TreeContext *ctx, uint32_t key, uint32_t offset_data);
+void tree_remove(TreeContext *ctx, uint32_t key);
+void tree_print(TreeContext *ctx);
 
 #endif //TRABALHO_EDA_26_1_DATABASE_H

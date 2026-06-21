@@ -102,30 +102,19 @@ void tree_node_write(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset) {
     free(buffer);
 }
 
-void load_header(const char *metadata_file, Header *h) {
-    FILE *fp = open_file(metadata_file, "rb");
-    read_data(fp, 0, h, sizeof(Header));
-    fclose(fp);
-}
-
-void save_header(const char *metadata_file, Header *h) {
-    FILE *fp = open_file(metadata_file, "wb");
-    write_data(fp, 0, h, sizeof(Header));
-    fclose(fp);
-}
-
-void tree_initialize(uint8_t t, char *index, char *data, char *metadata) {
-    FILE *file = open_file(index, "wb");
-    fclose(file);
-    file = open_file(data, "wb");
-    fclose(file);
+void tree_initialize(uint8_t t, const char *index, const char *data, const char *metadata){
+    create_file(index);
+    create_file(data);
 
     Header h;
     h.root = DISK_NULL;
     h.t = t;
     h.first_leaf = DISK_NULL;
     h.last_id_generated = 0;
-    save_header(metadata, &h);
+
+    FILE *metadata_file = open_file(metadata, "wb");
+    write_data(metadata_file, 0, &h, sizeof(Header));
+    fclose(metadata_file);
 }
 
 void node_initialize(TreeNode *node, uint8_t t) {
@@ -155,20 +144,6 @@ void node_free_arrays(TreeNode *node) {
         node->key = NULL;
         node->offset = NULL;
     }
-}
-
-void update_root(char *file_metadata, uint32_t new_root) {
-    Header h;
-    load_header(file_metadata, &h);
-    h.root = new_root;
-    save_header(file_metadata, &h);
-}
-
-void update_first_leaf(char *file_metadata, uint32_t new_first_leaf) {
-    Header h;
-    load_header(file_metadata, &h);
-    h.first_leaf = new_first_leaf;
-    save_header(file_metadata, &h);
 }
 
 void node_print(TreeNode *node) {
@@ -229,15 +204,8 @@ uint32_t search_key(FILE *index, uint8_t t, uint32_t offset, uint32_t key) {
     return search_key(index, t, next_child, key);
 }
 
-uint32_t tree_search(char *index, char *metadata, uint32_t key) {
-    FILE *fpi = open_file(index, "rb");
-
-    Header h;
-    load_header(metadata, &h);
-
-    uint32_t offset_data = search_key(fpi, h.t, h.root, key);
-    fclose(fpi);
-    return offset_data;
+uint32_t tree_search(const TreeContext *ctx, uint32_t key) {
+    return  search_key(ctx->fp_index, ctx->header.t, ctx->header.root, key);
 }
 
 void division(TreeNode *x, TreeNode *y, TreeNode *z, uint32_t offset_z, int i, uint8_t t) {
@@ -320,64 +288,57 @@ void insert_not_complete(FILE *fp, uint32_t node_offset, uint32_t id, uint32_t o
     insert_not_complete(fp, next_node_offset, id, offset_data, t);
 }
 
-void tree_insert(char *index, char *metadata, uint32_t key, uint32_t offset_data) {
-    FILE *fi = open_file(index, "rb+");
+void tree_insert(TreeContext *ctx, uint32_t key, uint32_t offset_data) {
+    Header h = ctx->header;
+    if(search_key(ctx->fp_index, h.t, h.root, key) != DISK_NULL) return;
 
-    Header h;
-    load_header(metadata, &h);
-    const uint8_t t = h.t;
-    uint32_t offset_root = h.root;
-
-    if(search_key(fi, t, offset_root, key) != DISK_NULL) {
-        fclose(fi);
-        return;
-    }
+    uint8_t t = h.t;
 
     TreeNode root;
     node_initialize(&root, t);
-    if(offset_root == DISK_NULL) {
+
+    if(h.root == DISK_NULL) {
         root.key[0] = key;
         root.offset[0] = offset_data;
         root.num_keys = 1;
-        offset_root = file_size(fi);
+        uint32_t new_root = file_size(ctx->fp_index);
+        ctx->header.root = new_root;
+        ctx->header.first_leaf = new_root;
+        write_data(ctx->fp_metadata, 0, &ctx->header, sizeof(Header));
 
-        node_free_and_save(&root, t, fi, offset_root);
-        fclose(fi);
-
-        h.root = offset_root;
-        h.first_leaf = offset_root;
-        save_header(metadata, &h);
+        node_free_and_save(&root, t, ctx->fp_index, new_root);
         return;
     }
 
-    tree_node_read(&root, t, fi, offset_root);
+    tree_node_read(&root, h.t, ctx->fp_index, h.root);
     uint32_t max_keys = 2 * t -1;
+    uint32_t offset_root = ctx->header.root;
 
     if(root.num_keys == max_keys) {
         TreeNode new_root;
         node_initialize(&new_root, t);
         new_root.is_leaf = 0;
-        new_root.offset[0] = offset_root;
+        new_root.offset[0] = h.root;
 
         TreeNode new_node;
         node_initialize(&new_node, t);
-        uint32_t new_node_offset = file_size(fi);
+        uint32_t new_node_offset = file_size(ctx->fp_index);
 
         division(&new_root, &root, &new_node, new_node_offset, 1, t);
 
-        node_free_and_save(&new_node, t, fi, new_node_offset);
-        node_free_and_save(&root, t, fi, offset_root);
-        offset_root = file_size(fi);
-        node_free_and_save(&new_root, t, fi, offset_root);
-        h.root = offset_root;
-        save_header(metadata, &h);
+        node_free_and_save(&new_node, t, ctx->fp_index, new_node_offset);
+        node_free_and_save(&root, t, ctx->fp_index, h.root);
+        offset_root = file_size(ctx->fp_index);
+        node_free_and_save(&new_root, t, ctx->fp_index, offset_root);
 
-        insert_not_complete(fi, offset_root, key, offset_data, t);
+        // Altera a raiz para o novo nó criado
+        ctx->header.root = offset_root;
+        write_data(ctx->fp_metadata, 0, &ctx->header, sizeof(Header));
     } else {
         node_free_arrays(&root);
-        insert_not_complete(fi, offset_root, key, offset_data, t);
     }
-    fclose(fi);
+
+    insert_not_complete(ctx->fp_index, offset_root, key, offset_data, t);
 }
 
 void imp(FILE *fp, uint32_t node_offset, uint8_t t, int andar) {
@@ -402,24 +363,13 @@ void imp(FILE *fp, uint32_t node_offset, uint8_t t, int andar) {
     node_free_arrays(&current_node);
 }
 
-void tree_print(char *index, char *metadata) {
-    FILE *fi = open_file(index, "rb+");
-
-    Header h;
-    load_header(metadata, &h);
-
-    uint32_t offset_root = h.root;
-    if(offset_root == DISK_NULL) {
-        printf("Árvore vazia!");
-    } else {
-        uint8_t t = h.t;
-        imp(fi, offset_root, t, 0);
-    }
-
-    fclose(fi);
+void tree_print(TreeContext *ctx) {
+    if(ctx->header.root == DISK_NULL) printf("Árvore vazia!");
+    else imp(ctx->fp_index, ctx->header.root, ctx->header.t, 0);
 }
 
 void case_1(TreeNode *node, int i) {
+    printf("Caso 1 - removendo chave %d\n", node->key[i]);
     for(; i < node->num_keys-1; i++) {
         node->key[i] = node->key[i+1];
         node->offset[i] = node->offset[i+1];
@@ -554,31 +504,36 @@ bool case_3b_equal_num_keys(TreeNode *current_node, TreeNode *y, TreeNode *z, ui
     return false;
 }
 
-void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uint32_t key, uint8_t t) {
+void aux_tree_remove(TreeContext *ctx, uint32_t offset_current_node, uint32_t key) {
     if(offset_current_node == DISK_NULL) return;
 
     TreeNode current_node;
-    node_initialize_and_load(&current_node, t, fp, offset_current_node);
+    Header h = ctx->header;
+
+    node_initialize_and_load(&current_node, h.t, ctx->fp_index, offset_current_node);
+
+    uint8_t t = h.t;
 
     int i;
     for(i = 0; i < current_node.num_keys && current_node.key[i] < key; i++);
 
     if((i < current_node.num_keys) && (key == current_node.key[i]) && (current_node.is_leaf)) { //CASO 1
-        printf("\nCASO 1\n");
+        printf("Caso 1 - removendo chave %d\n", current_node.key[i]);
         case_1(&current_node, i);
 
-        if(current_node.num_keys > 0) node_free_and_save(&current_node, t, fp, offset_current_node);
+        if(current_node.num_keys > 0) node_free_and_save(&current_node, t, ctx->fp_index, offset_current_node);
         // Só fica com quantidade igual a 0 se a folha for a raiz
         else {
-            update_root(metadata, DISK_NULL);
-            update_first_leaf(metadata, DISK_NULL);
+            h.root = DISK_NULL;
+            h.first_leaf = DISK_NULL;
+            write_data(ctx->fp_metadata, 0, &ctx->header, sizeof(Header));
         }
         return;
     }
 
     if((i < current_node.num_keys) && (key == current_node.key[i])) i++;
     TreeNode y, z;
-    node_initialize_and_load(&y, t, fp, current_node.offset[i]);
+    node_initialize_and_load(&y, h.t, ctx->fp_index, current_node.offset[i]);
     uint32_t offset_y = current_node.offset[i];
     uint32_t offset_next = offset_y;
 
@@ -587,13 +542,13 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
 
         // 1. Tenta o Irmão da DIREITA (Caso 3A - Empréstimo da Direita)
         if (i < current_node.num_keys) {
-            node_initialize_and_load(&z, t, fp, current_node.offset[i + 1]);
+            node_initialize_and_load(&z, t, ctx->fp_index, current_node.offset[i + 1]);
             if (z.num_keys >= t) {
-                printf("\nCASO 3A: Emprestimo do irmao da direita\n");
+                printf("Caso 3A - removendo chave %d\n", key);
                 case_3a_less_than_num_keys(&current_node, &y, &z, t, i);
-                node_free_and_save(&y, t, fp, current_node.offset[i]);
-                node_free_and_save(&z, t, fp, current_node.offset[i + 1]);
-                node_free_and_save(&current_node, t, fp, offset_current_node);
+                node_free_and_save(&y, t, ctx->fp_index, current_node.offset[i]);
+                node_free_and_save(&z, t, ctx->fp_index, current_node.offset[i + 1]);
+                node_free_and_save(&current_node, t, ctx->fp_index, offset_current_node);
                 solved = true;
             } else {
                 // Se o da direita existe mas não tem chaves para emprestar,
@@ -604,13 +559,13 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
 
         // 2. Tenta o Irmão da ESQUERDA (Caso 3A - Empréstimo da Esquerda)
         if (!solved && i > 0) {
-            node_initialize_and_load(&z, t, fp, current_node.offset[i - 1]);
+            node_initialize_and_load(&z, t, ctx->fp_index, current_node.offset[i - 1]);
             if (z.num_keys >= t) {
-                printf("\nCASO 3A: Emprestimo do irmao da esquerda\n");
+                printf("Caso 3A - removendo chave %d\n", key);
                 case_3a_equal_num_keys(&current_node, &y, &z, t, i);
-                node_free_and_save(&y, t, fp, current_node.offset[i]);
-                node_free_and_save(&z, t, fp, current_node.offset[i - 1]);
-                node_free_and_save(&current_node, t, fp, offset_current_node);
+                node_free_and_save(&y, t, ctx->fp_index, current_node.offset[i]);
+                node_free_and_save(&z, t, ctx->fp_index, current_node.offset[i - 1]);
+                node_free_and_save(&current_node, t, ctx->fp_index, offset_current_node);
                 solved = true;
             } else {
                 node_free_arrays(&z);
@@ -620,30 +575,34 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
         // 3. Se ninguém pôde emprestar, faz a CONCATENAÇÃO (Caso 3B)
         if (!solved) {
             if (i < current_node.num_keys) {
-                // Tem irmão na direita? Fundo com ele!
-                printf("\nCASO 3B: Fundindo com irmao da direita\n");
-                node_initialize_and_load(&z, t, fp, current_node.offset[i + 1]);
+                printf("Caso 3B - removendo chave %d\n", key);
+                node_initialize_and_load(&z, t, ctx->fp_index, current_node.offset[i + 1]);
 
                 bool is_new_root = case_3b_less_than_num_keys(&current_node, &y, &z, t, i);
 
                 if (is_new_root) {
-                    update_root(metadata, offset_y);
+                    h.root = offset_y;
+                    node_free_arrays(&current_node);
                 }
-                else node_free_and_save(&current_node, t, fp, offset_current_node);
+                else node_free_and_save(&current_node, t, ctx->fp_index, offset_current_node);
 
-                node_free_and_save(&y, t, fp, offset_y);
+                node_free_and_save(&y, t, ctx->fp_index, offset_y);
                 node_free_arrays(&z);
             } else {
                 uint32_t offset_z = current_node.offset[i-1];
-                printf("Caso 3B: Fundido com o irmçao da esquerda\n");
-                node_initialize_and_load(&z, t, fp, current_node.offset[i-1]);
+                printf("Caso 3B - removendo chave %d\n", key);
+                node_initialize_and_load(&z, t, ctx->fp_index, current_node.offset[i-1]);
 
                 bool is_new_root = case_3b_equal_num_keys(&current_node, &y, &z, t, i);
 
-                if(is_new_root) update_root(metadata, offset_z);
-                else node_free_and_save(&current_node, t, fp, offset_current_node);
+                if(is_new_root) {
+                    node_free_arrays(&current_node);
+                    h.root = offset_z;
+                }
+                else node_free_and_save(&current_node, t, ctx->fp_index, offset_current_node);
 
-                node_free_and_save(&z, t, fp, offset_z);
+                node_free_and_save(&z, t, ctx->fp_index, offset_z);
+                node_free_arrays(&y);
                 offset_next = offset_z;
             }
         }
@@ -652,17 +611,9 @@ void aux_tree_remove(FILE *fp, char *metadata, uint32_t offset_current_node, uin
         node_free_arrays(&y);
     }
 
-    aux_tree_remove(fp, metadata, offset_next, key, t);
+    aux_tree_remove(ctx, offset_next, key);
 }
 
-void tree_remove(char *index, char *metadata, uint32_t key) {
-    Header h;
-    load_header(metadata, &h);
-
-    uint32_t root = h.root;
-    uint8_t t = h.t;
-    FILE *fp = open_file(index, "rb+");
-
-    aux_tree_remove(fp, metadata, root, key, t);
-    fclose(fp);
+void tree_remove(TreeContext *ctx, uint32_t key) {
+    aux_tree_remove(ctx, ctx->header.root, key);
 }

@@ -3,8 +3,8 @@
 
 #define LINE_LENGTH 256
 
-#include <stdint.h>
+#include "data_base_manipulation.h"
 
-void import_data(uint8_t t);
+void import_data(DB *db);
 
 #endif

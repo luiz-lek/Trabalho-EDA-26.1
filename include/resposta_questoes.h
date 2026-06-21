@@ -7,4 +7,4 @@
 
 void pessoas_trabalharam_juntas(); // A
 
-#endif //TRABALHO_EDA_26_1_RESPOSTA_QUESTOES_H
+#endif

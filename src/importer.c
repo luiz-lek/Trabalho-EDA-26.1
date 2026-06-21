@@ -6,7 +6,6 @@
 #include "../include/file_manager.h"
 #include "../include/person.h"
 #include "../include/movie.h"
-#include "../include/data_structures_manipulation.h"
 
 #include <string.h>
 
@@ -74,63 +73,45 @@ void fill_movie(Movie *m, char *line) {
     get_token_formated(line, m->subtitle, '|'); // Lê o subtítulo.
 }
 
-void import_movies_and_persons(uint8_t t) {
-    uint32_t person_id = -1;
-    uint32_t movie_id = -1;
-
-    FILE* fp = open_file(PATH_NODES, "r");
-
-    movie_tree_initialize(t);
-    person_tree_initialize(t);
-
-    hash_person_to_id_initialize();
-    hash_movie_to_id_initialize();
-
-    FILE *movie_data = open_file(PATH_DATA_MOVIE_TREE, "wb");
-    FILE *person_data = open_file(PATH_DATA_PERSON_TREE, "wb");
+void import_movies_and_persons(DB *db) {
+    FILE *brute_data = open_file(PATH_NODES, "r");
 
     char buffer[LINE_LENGTH];
 
     Person p;
     Movie m;
+    uint32_t person_id = -1,
+             movie_id = -1,
+             offset_movie_data = 0,
+             offset_person_data = 0;
 
-    uint32_t offset_movie_data = 0, offset_person_data = 0;
-
-    // pendente: adicionar as pessoas e filmes nas tabelas para relacionar seus ids.
-
-    while (fgets(buffer, LINE_LENGTH, fp) != NULL) {
+    while (fgets(buffer, LINE_LENGTH, brute_data) != NULL) {
         buffer[strcspn(buffer, "\n")] = '\0';
         if(buffer[0] == 'P') {
             person_id++;
             fill_person(&p, buffer);
 
-            offset_person_data = file_size(person_data);
-            write_data(person_data, offset_person_data, &p, sizeof(Person));
-            hash_person_to_id_insert(p.name, person_id);
-            person_tree_insert(person_id, offset_person_data);
+            offset_person_data = file_size(db->tree_person_context.fp_data);
+            write_data(db->tree_person_context.fp_data, offset_person_data, &p, sizeof(Person));
+            tree_insert(&db->tree_person_context, person_id, offset_person_data);
+            hash_disk_insert(&db->hash_person_lookup_context, p.name, person_id);
         }
         if(buffer[0] == 'M') {
             movie_id++;
             fill_movie(&m, buffer);
 
-            offset_movie_data = file_size(movie_data);
-            write_data(movie_data, offset_movie_data, &m, sizeof(Movie));
-            hash_movie_to_id_insert(m.title, movie_id);
-            movie_tree_insert(movie_id, offset_movie_data);
+            offset_movie_data = file_size(db->tree_movie_context.fp_data);
+            write_data(db->tree_movie_context.fp_data, offset_movie_data, &m, sizeof(Movie));
+            tree_insert(&db->tree_movie_context, movie_id, offset_movie_data);
+            hash_disk_insert(&db->hash_movie_lookup_context, m.title, movie_id);
         }
     }
 
-    fclose(movie_data);
-    fclose(person_data);
+    fclose(brute_data);
 }
 
-void import_relationships() {
+void import_relationships(DB *db) {
     FILE *fp = open_file(PATH_RELATIONSHIPS, "r");
-
-    create_file(PATH_RELATIONS_DATA);
-
-    hash_person_to_movie_initialize();
-    hash_movie_to_person_initialize();
 
     char line[LINE_LENGTH];
     char token_buffer[LINE_LENGTH];
@@ -142,32 +123,55 @@ void import_relationships() {
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = hash_person_to_id_get_value(token_buffer);
+        relationship.person_id = hash_disk_get_value(&db->hash_person_lookup_context, token_buffer);
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = hash_movie_to_id_get_value(token_buffer);
+        relationship.movie_id = hash_disk_get_value(&db->hash_movie_lookup_context, token_buffer);
 
         // Só tem papel se for relação do tipo atuação
         if(relationship.relationship_type == ACTED_IN) {
             jump_token(line, ':');
-            get_token_formated(line, token_buffer, '|');
-            strcpy(relationship.role, token_buffer);
+            get_token_formated(line, token_buffer, '\0');
+            strncpy(relationship.role, token_buffer, sizeof(relationship.role)-1);
         } else {
             relationship.role[0] = '\0';
         }
 
         // Insere no arquivo de relacionamento com as listas encadeadas de folme pra pessoa e pessoa pra filme
-        insert_relation(&relationship);
+        insert_relation(db->relation, &relationship,
+            &db->hash_person_relations_context,
+            &db->hash_movie_relations_context);
     }
 
     fclose(fp);
 }
 
-void import_data(uint8_t t) {
-    import_movies_and_persons(t);
-    import_relationships();
+void import_data(DB *db) {
+    import_movies_and_persons(db);
+
+    fflush(db->tree_movie_context.fp_index);
+    fflush(db->tree_movie_context.fp_metadata);
+
+    fflush(db->tree_person_context.fp_index);
+    fflush(db->tree_person_context.fp_metadata);
+
+    fflush(db->hash_person_lookup_context.fph);
+    fflush(db->hash_person_lookup_context.fpd);
+
+    fflush(db->hash_movie_lookup_context.fph);
+    fflush(db->hash_movie_lookup_context.fpd);
+
+    import_relationships(db);
+
+    fflush(db->hash_person_relations_context.fph);
+    fflush(db->hash_person_relations_context.fpd);
+
+    fflush(db->hash_movie_relations_context.fph);
+    fflush(db->hash_movie_relations_context.fpd);
+
+    fflush(db->relation);
 }

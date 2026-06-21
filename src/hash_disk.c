@@ -10,7 +10,7 @@
 
 #define TAM_BUFFER_SIZE 1024
 
-uint32_t hash(const HashFunction generate_brute_number, const void *key, int num_buckets) {
+uint32_t hash_function(HashFunction generate_brute_number, const void *key, int num_buckets) {
     const uint32_t brute_number = generate_brute_number(key);
     return brute_number % num_buckets * sizeof(uint32_t);
 }
@@ -36,20 +36,21 @@ void hash_disk_initialize(const char *path_table, const char *path_data, int num
     create_file(path_data);
 }
 
-void hash_disk_insert(const char *path_table, const char *path_data, int num_buckets,
-    CompareFunction comparator, HashFunction generate_brute_number, const void *key, uint32_t valor, size_t key_size) {
-
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
-
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
+void hash_disk_insert(HashContext *ctx, const void *key, uint32_t valor) {
+    uint32_t h = hash_function(ctx->generate_brute_number, key, ctx->num_buckets);
 
     uint32_t offset_list_head;
-    read_data(fph, h, &offset_list_head, sizeof(uint32_t));
+    read_data(ctx->fph, h, &offset_list_head, sizeof(uint32_t));
 
-    HashData new_data;
+    HashDiskNode new_data;
     memset(&new_data.key, 0, sizeof(new_data.key));
-    memcpy(&new_data.key, key, key_size);
+
+    size_t copy_size = ctx->key_size;
+    if (copy_size > sizeof(new_data.key)) {
+        copy_size = sizeof(new_data.key);
+    }
+
+    memcpy(&new_data.key, key, copy_size);
     new_data.valor = valor;
     new_data.next = DISK_NULL;
     new_data.valid = 1;
@@ -57,11 +58,11 @@ void hash_disk_insert(const char *path_table, const char *path_data, int num_buc
 
     // Ainda não foi inserido nenhum elemento no bucket
     if(offset_list_head == DISK_NULL) {
-        uint32_t offset_new_data = file_size(fpd);
-        write_data(fph, h, &offset_new_data, sizeof(uint32_t));
-        write_data(fpd, offset_new_data, &new_data, sizeof(HashData));
+        uint32_t offset_new_data = file_size(ctx->fpd);
+        write_data(ctx->fph, h, &offset_new_data, sizeof(uint32_t));
+        write_data(ctx->fpd, offset_new_data, &new_data, sizeof(HashDiskNode));
     } else {
-        HashData current;
+        HashDiskNode current;
         uint32_t offset_current = offset_list_head, offset_last = DISK_NULL;
         uint32_t offset_first_free_position = DISK_NULL;
 
@@ -69,8 +70,8 @@ void hash_disk_insert(const char *path_table, const char *path_data, int num_buc
         bool data_found = 0;
         do {
             offset_last = offset_current;
-            read_data(fpd, offset_current, &current, sizeof(HashData));
-            if(current.valid && comparator(&current.key, key)) {
+            read_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
+            if(current.valid && ctx->comparator(&current.key, key)) {
                 data_found = true;
                 break;
             }
@@ -84,92 +85,65 @@ void hash_disk_insert(const char *path_table, const char *path_data, int num_buc
         // O nome ainda não tá na hash e pode ser inserido
         if(!data_found) {
             if(offset_first_free_position == DISK_NULL) {
-                offset_first_free_position = file_size(fpd);
+                offset_first_free_position = file_size(ctx->fpd);
                 current.next = offset_first_free_position;
-                write_data(fpd, offset_last, &current, sizeof(HashData));
+                write_data(ctx->fpd, offset_last, &current, sizeof(HashDiskNode));
             }
-            write_data(fpd, offset_first_free_position, &new_data, sizeof(HashData));
+            write_data(ctx->fpd, offset_first_free_position, &new_data, sizeof(HashDiskNode));
         }
     }
-
-    fclose(fph);
-    fclose(fpd);
 }
 
-void hash_disk_remove_data(const char *path_table, const char *path_data, int num_buckets,
-    CompareFunction comparator, HashFunction generate_brute_number, const void *key) {
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
+void hash_disk_remove_data(HashContext *ctx, int num_buckets, const void *key) {
+    uint32_t h = hash_function(ctx->generate_brute_number, key, num_buckets);
 
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
+    HashDiskNode current;
     uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
+    read_data(ctx->fph, h, &offset_current, sizeof(uint32_t));
 
     while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
+        read_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
+        if(current.valid && ctx->comparator(&current.key, key)) {
             current.valid = 0;
-            write_data(fpd, offset_current, &current, sizeof(HashData));
+            write_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
             break;
         }
         offset_current = current.next;
     }
-
-    fclose(fpd);
 }
 
-uint32_t hash_disk_get_value(const char *path_table, const char *path_data, int num_buckets,
-    CompareFunction comparator, HashFunction generate_brute_number, const void *key) {
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
+uint32_t hash_disk_get_value(HashContext *ctx, const void *key) {
+    uint32_t h = hash_function(ctx->generate_brute_number, key, ctx->num_buckets);
 
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
+    HashDiskNode current;
     uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
+    read_data(ctx->fph, h, &offset_current, sizeof(uint32_t));
 
     while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
-            fclose(fpd);
-            return current.valor;
-        }
+        read_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
+        if(current.valid && ctx->comparator(&current.key, key)) return current.valor;
         offset_current = current.next;
     }
 
-    fclose(fpd);
     return DISK_NULL;
 }
 
-void hash_disk_change_value(const char *path_table, const char *path_data, int num_buckets,
-    CompareFunction comparator, HashFunction generate_brute_number, const void *key, uint32_t new_value) {
+void hash_disk_change_value(HashContext *ctx, const void *key, uint32_t new_value) {
+    uint32_t h = hash_function(ctx->generate_brute_number, key, ctx->num_buckets);
 
-    FILE *fph = open_file(path_table, "rb+");
-    FILE *fpd = open_file(path_data, "rb+");
-
-    uint32_t h = hash(generate_brute_number, key, num_buckets);
-
-    HashData current;
+    HashDiskNode current;
     uint32_t offset_current;
-    read_data(fph, h, &offset_current, sizeof(uint32_t));
-    fclose(fph);
+    read_data(ctx->fph, h, &offset_current, sizeof(uint32_t));
 
     while(offset_current != DISK_NULL) {
-        read_data(fpd, offset_current, &current, sizeof(HashData));
-        if(current.valid && comparator(&current.key, key)) {
+        read_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
+        if(current.valid && ctx->comparator(&current.key, key)) {
             current.valor = new_value;
-            write_data(fpd, offset_current, &current, sizeof(HashData));
+            write_data(ctx->fpd, offset_current, &current, sizeof(HashDiskNode));
             break;
         }
         offset_current = current.next;
     }
-
-    fclose(fpd);
 }
 
 void hash_disk_delete_table(const char *path_table, const char *path_data) {

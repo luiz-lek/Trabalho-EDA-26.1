@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-int hash(int num) {
-    return num % TAM_HASH;
+int hash(int num, int table_size) {
+    return num % table_size;
 }
 
-HashList* hash_list_create(size_t key_size, size_t value_size) {
-    HashList *new = malloc(sizeof(HashList));
+HashNode* hash_list_create(size_t key_size, size_t value_size) {
+    HashNode *new = malloc(sizeof(HashNode));
     if(!new) {
         perror("Falha ao alocar hash_list");
         exit(EXIT_FAILURE);
@@ -25,24 +25,30 @@ HashList* hash_list_create(size_t key_size, size_t value_size) {
     return new;
 }
 
-HashList* hash_list_destroy(HashList *hash_list) {
+HashNode* hash_list_destroy(HashNode *hash_list) {
     free(hash_list->key);
     free(hash_list->value);
     free(hash_list);
     return NULL;
 }
 
-void hash_inicilize(TH table) {
-    for (int i = 0; i < TAM_HASH; i++) table[i] = NULL;
+HashNode** hash_inicialize(HashNode** table, int table_size) {
+    table = malloc(sizeof(HashNode*) * table_size);
+    if(!table) {
+        perror("Falha ao alocar hash_list");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < table_size; i++) table[i] = NULL;
+    return table;
 }
 
-void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
+void hash_insert(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal,
     const void *key, size_t key_size, const void *value, size_t value_size) {
 
     int brute_number = generate_number(key);
-    int h = hash(brute_number);
+    int h = hash(brute_number, table_size);
 
-    HashList *current = table[h];
+    HashNode *current = table[h];
 
     while(current != NULL) {
         // Não permite chaves repetidas
@@ -50,8 +56,8 @@ void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
         current = current->next;
     }
 
-    HashList *head = table[h];
-    HashList *new = hash_list_create(key_size, value_size);
+    HashNode *head = table[h];
+    HashNode *new = hash_list_create(key_size, value_size);
 
     memcpy(new->key, key, key_size);
     memcpy(new->value, value, value_size);
@@ -59,11 +65,13 @@ void hash_insert(TH table, HashFunction generate_number, CompareFunction equal,
     table[h] = new;
 }
 
-void hash_update_valor(TH table, HashFunction generate_number, CompareFunction equal, const void *key, const void *value, size_t value_size) {
-    int brute_number = generate_number(key);
-    int h = hash(brute_number);
+void hash_update_valor(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal,
+    const void *key, const void *value, size_t value_size) {
 
-    HashList *current = table[h];
+    int brute_number = generate_number(key);
+    int h = hash(brute_number, table_size);
+
+    HashNode *current = table[h];
     while(current != NULL && !equal(current->key, key)) current = current->next;
 
     // Chave não encontrada
@@ -72,12 +80,12 @@ void hash_update_valor(TH table, HashFunction generate_number, CompareFunction e
     memcpy(current->value, value, value_size);
 }
 
-void hash_remove(TH table, HashFunction generate_number, CompareFunction equal, const void *key) {
+void hash_remove(HashNode** table, int table_size, HashFunction generate_number, CompareFunction equal, const void *key) {
     int brute_number = generate_number(key);
-    int h = hash(brute_number);
+    int h = hash(brute_number, table_size);
 
-    HashList *current = table[h];
-    HashList *prev = NULL;
+    HashNode *current = table[h];
+    HashNode *prev = NULL;
 
     if(!current) return;
     if(equal(current->key, key)) {
@@ -99,15 +107,31 @@ void hash_remove(TH table, HashFunction generate_number, CompareFunction equal, 
     current = hash_list_destroy(current);
 }
 
-void hash_destroy(TH table) {
-    for(int i = 0; i < TAM_HASH; i++) {
+void hash_destroy(HashNode** table, int table_size) {
+    for(int i = 0; i < table_size; i++) {
         if(table[i]) {
-            HashList *current = table[i], *temp = NULL;
+            HashNode *current = table[i], *temp = NULL;
             while(current != NULL) {
                 temp = current;
                 current = current->next;
                 temp = hash_list_destroy(temp);
             }
+            table[i] = NULL;
         }
+    }
+    free(table);
+}
+
+void hash_print(HashNode** table, int table_size, PrintFunction print) {
+    HashNode *current;
+    for(int i = 0; i < table_size; i++) {
+        printf("%d: ", i);
+        current = table[i];
+        while(current != NULL) {
+            print(current->key, current->value);
+            printf(" -> ");
+            current = current->next;
+        }
+        printf("NULL\n");
     }
 }

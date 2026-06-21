@@ -9,14 +9,14 @@
 #define PATH_RELATIONSHIPS "../requirements/Relationships.txt"
 
 // Arquivos árvore de pessoas
-#define PATH_INDEX_PERSON_TREE "../data_base/tree/person/index.dat"
-#define PATH_DATA_PERSON_TREE "../data_base/tree/person/data.dat"
-#define PATH_METADATA_PERSON_TREE "../data_base/tree/person/metadata.dat"
+#define PATH_TREE_PERSON_INDEX "../data_base/tree/person/index.dat"
+#define PATH_TREE_PERSON_DATA "../data_base/tree/person/data.dat"
+#define PATH_TREE_PERSON_METADATA "../data_base/tree/person/metadata.dat"
 
 // Arquivos árvore de filmes
-#define PATH_INDEX_MOVIE_TREE "../data_base/tree/movie/index.dat"
-#define PATH_DATA_MOVIE_TREE "../data_base/tree/movie/data.dat"
-#define PATH_METADATA_MOVIE_TREE "../data_base/tree/movie/metadata.dat"
+#define PATH_TREE_MOVIE_INDEX "../data_base/tree/movie/index.dat"
+#define PATH_TREE_MOVIE_DATA "../data_base/tree/movie/data.dat"
+#define PATH_TREE_MOVIE_METADATA "../data_base/tree/movie/metadata.dat"
 
 
 
@@ -30,20 +30,20 @@
 
 
 // Arquivos da hash que relaciona o nome do filme com seu id
-#define PATH_HASH_MOVIE_TO_ID_TABLE "../data_base/hash/movie_to_id/table.dat"
-#define PATH_HASH_MOVIE_TO_ID_DATA "../data_base/hash/movie_to_id/data.dat"
+#define PATH_HASH_MOVIE_LOOKUP_TABLE "../data_base/hash/movie_to_id/table.dat"
+#define PATH_HASH_MOVIE_LOOKUP_DATA "../data_base/hash/movie_to_id/data.dat"
 
 // Arquivos da hash que relaciona o nome da pessoa com seu id
-#define PATH_HASH_PERSON_TO_ID_TABLE "../data_base/hash/person_to_id/table.dat"
-#define PATH_HASH_PERSON_TO_ID_DATA "../data_base/hash/person_to_id/data.dat"
+#define PATH_HASH_PERSON_LOOKUP_TABLE "../data_base/hash/person_to_id/table.dat"
+#define PATH_HASH_PERSON_LOOKUP_DATA "../data_base/hash/person_to_id/data.dat"
 
 // Arquivos da hash que relaciona o id do filme com a lista de pessoas participantes
-#define PATH_HASH_MOVIE_TO_PERSON_TABLE "../data_base/hash/movie_to_person/table.dat"
-#define PATH_HASH_MOVIE_TO_PERSON_DATA "../data_base/hash/movie_to_person/data.dat"
+#define PATH_HASH_MOVIE_RELS_TABLE "../data_base/hash/movie_to_person/table.dat"
+#define PATH_HASH_MOVIE_RELS_DATA "../data_base/hash/movie_to_person/data.dat"
 
 // Arquivo que relaciona o id da pessoa com a lista de filmes que ela participou
-#define PATH_HASH_PERSON_TO_MOVIE_TABLE "../data_base/hash/person_to_movie/table.dat"
-#define PATH_HASH_PERSON_TO_MOVIE_DATA "../data_base/hash/person_to_movie/data.dat"
+#define PATH_HASH_PERSON_RELS_TABLE "../data_base/hash/person_to_movie/table.dat"
+#define PATH_HASH_PERSON_RELS_DATA "../data_base/hash/person_to_movie/data.dat"
 
 
 
