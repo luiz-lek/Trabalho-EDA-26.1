@@ -10,7 +10,7 @@
 
 #define TAM_BUFFER_SIZE 1024
 
-uint32_t hash_function(HashFunction generate_brute_number, const void *key, int num_buckets) {
+uint32_t hash_function(HashDISKFunction generate_brute_number, const void *key, int num_buckets) {
     const uint32_t brute_number = generate_brute_number(key);
     return brute_number % num_buckets * sizeof(uint32_t);
 }
@@ -112,7 +112,7 @@ void hash_disk_remove_data(HashContext *ctx, int num_buckets, const void *key) {
     }
 }
 
-uint32_t hash_disk_get_value(HashContext *ctx, const void *key) {
+uint32_t hash_disk_lookup(HashContext *ctx, const void *key) {
     uint32_t h = hash_function(ctx->generate_brute_number, key, ctx->num_buckets);
 
     HashDiskNode current;

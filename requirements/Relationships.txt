@@ -239,3 +239,125 @@
     START Person | Madonna | ACTED_IN | END Movie | A League of Their Own | role: "All the Way" Mae Mordabito
     START Person | Bill Paxton | ACTED_IN | END Movie | A League of Their Own | role: Bob Hinson
     START Person | Penny Marshall | DIRECTED | END Movie | A League of Their Own
+    START Person | Christopher Nolan | DIRECTED | END Movie | Inception |
+    START Person | Christopher Nolan | PRODUCED | END Movie | Inception |
+    START Person | Christopher Nolan | WROTE | END Movie | Inception |
+    START Person | Leonardo DiCaprio | ACTED_IN | END Movie | Inception | role: Cobb
+    START Person | Joseph Gordon-Levitt | ACTED_IN | END Movie | Inception | role: Arthur
+    START Person | Elliot Page | ACTED_IN | END Movie | Inception | role: Ariadne
+    START Person | Tom Hardy | ACTED_IN | END Movie | Inception | role: Eames
+    START Person | Michael Caine | ACTED_IN | END Movie | Inception | role: Miles
+    START Person | Christopher Nolan | DIRECTED | END Movie | Interstellar |
+    START Person | Christopher Nolan | PRODUCED | END Movie | Interstellar |
+    START Person | Christopher Nolan | WROTE | END Movie | Interstellar |
+    START Person | Matthew McConaughey | ACTED_IN | END Movie | Interstellar | role: Cooper
+    START Person | Anne Hathaway | ACTED_IN | END Movie | Interstellar | role: Brand
+    START Person | Jessica Chastain | ACTED_IN | END Movie | Interstellar | role: Murph
+    START Person | Michael Caine | ACTED_IN | END Movie | Interstellar | role: Professor Brand
+    START Person | Christopher Nolan | DIRECTED | END Movie | The Dark Knight |
+    START Person | Christopher Nolan | PRODUCED | END Movie | The Dark Knight |
+    START Person | Christopher Nolan | WROTE | END Movie | The Dark Knight |
+    START Person | Christian Bale | ACTED_IN | END Movie | The Dark Knight | role: Bruce Wayne
+    START Person | Heath Ledger | ACTED_IN | END Movie | The Dark Knight | role: Joker
+    START Person | Gary Oldman | ACTED_IN | END Movie | The Dark Knight | role: Gordon
+    START Person | Michael Caine | ACTED_IN | END Movie | The Dark Knight | role: Alfred
+    START Person | Morgan Freeman | ACTED_IN | END Movie | The Dark Knight | role: Lucius
+    START Person | Quentin Tarantino | DIRECTED | END Movie | Pulp Fiction |
+    START Person | Quentin Tarantino | WROTE | END Movie | Pulp Fiction |
+    START Person | Quentin Tarantino | ACTED_IN | END Movie | Pulp Fiction | role: Jimmie
+    START Person | John Travolta | ACTED_IN | END Movie | Pulp Fiction | role: Vincent Vega
+    START Person | Samuel L. Jackson | ACTED_IN | END Movie | Pulp Fiction | role: Jules Winnfield
+    START Person | Uma Thurman | ACTED_IN | END Movie | Pulp Fiction | role: Mia Wallace
+    START Person | Quentin Tarantino | DIRECTED | END Movie | Django Unchained |
+    START Person | Quentin Tarantino | WROTE | END Movie | Django Unchained |
+    START Person | Jamie Foxx | ACTED_IN | END Movie | Django Unchained | role: Django
+    START Person | Christoph Waltz | ACTED_IN | END Movie | Django Unchained | role: Dr. King Schultz
+    START Person | Leonardo DiCaprio | ACTED_IN | END Movie | Django Unchained | role: Calvin Candie
+    START Person | Samuel L. Jackson | ACTED_IN | END Movie | Django Unchained | role: Stephen
+    START Person | Peter Jackson | DIRECTED | END Movie | The Lord of the Rings: The Fellowship of the Ring |
+    START Person | Peter Jackson | PRODUCED | END Movie | The Lord of the Rings: The Fellowship of the Ring |
+    START Person | Peter Jackson | WROTE | END Movie | The Lord of the Rings: The Fellowship of the Ring |
+    START Person | Elijah Wood | ACTED_IN | END Movie | The Lord of the Rings: The Fellowship of the Ring | role: Frodo
+    START Person | Ian McKellen | ACTED_IN | END Movie | The Lord of the Rings: The Fellowship of the Ring | role: Gandalf
+    START Person | Viggo Mortensen | ACTED_IN | END Movie | The Lord of the Rings: The Fellowship of the Ring | role: Aragorn
+    START Person | Orlando Bloom | ACTED_IN | END Movie | The Lord of the Rings: The Fellowship of the Ring | role: Legolas
+    START Person | Sean Astin | ACTED_IN | END Movie | The Lord of the Rings: The Fellowship of the Ring | role: Sam
+    START Person | Peter Jackson | DIRECTED | END Movie | The Lord of the Rings: The Two Towers |
+    START Person | Peter Jackson | PRODUCED | END Movie | The Lord of the Rings: The Two Towers |
+    START Person | Peter Jackson | WROTE | END Movie | The Lord of the Rings: The Two Towers |
+    START Person | Elijah Wood | ACTED_IN | END Movie | The Lord of the Rings: The Two Towers | role: Frodo
+    START Person | Ian McKellen | ACTED_IN | END Movie | The Lord of the Rings: The Two Towers | role: Gandalf
+    START Person | Viggo Mortensen | ACTED_IN | END Movie | The Lord of the Rings: The Two Towers | role: Aragorn
+    START Person | Orlando Bloom | ACTED_IN | END Movie | The Lord of the Rings: The Two Towers | role: Legolas
+    START Person | Sean Astin | ACTED_IN | END Movie | The Lord of the Rings: The Two Towers | role: Sam
+    START Person | Joss Whedon | DIRECTED | END Movie | The Avengers
+    START Person | Joss Whedon | WROTE | END Movie | The Avengers
+    START Person | Robert Downey Jr. | ACTED_IN | END Movie | The Avengers | role: Tony Stark
+    START Person | Chris Evans | ACTED_IN | END Movie | The Avengers | role: Steve Rogers
+    START Person | Scarlett Johansson | ACTED_IN | END Movie | The Avengers | role: Natasha Romanoff
+    START Person | Chris Hemsworth | ACTED_IN | END Movie | The Avengers | role: Thor
+    START Person | Mark Ruffalo | ACTED_IN | END Movie | The Avengers | role: Bruce Banner
+    START Person | Samuel L. Jackson | ACTED_IN | END Movie | The Avengers | role: Nick Fury
+    START Person | Jon Favreau | DIRECTED | END Movie | Iron Man
+    START Person | Jon Favreau | ACTED_IN | END Movie | Iron Man | role: Happy Hogan
+    START Person | Robert Downey Jr. | ACTED_IN | END Movie | Iron Man | role: Tony Stark
+    START Person | Gwyneth Paltrow | ACTED_IN | END Movie | Iron Man | role: Pepper Potts
+    START Person | Samuel L. Jackson | ACTED_IN | END Movie | Iron Man | role: Nick Fury
+    START Person | Chris Columbus | DIRECTED | END Movie | Harry Potter and the Sorcerer's Stone
+    START Person | Daniel Radcliffe | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Harry Potter
+    START Person | Emma Watson | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Hermione Granger
+    START Person | Rupert Grint | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Ron Weasley
+    START Person | Maggie Smith | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Professor McGonagall
+    START Person | Alan Rickman | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Professor Snape
+    START Person | Richard Harris | ACTED_IN | END Movie | Harry Potter and the Sorcerer's Stone | role: Albus Dumbledore
+    START Person | Chris Columbus | DIRECTED | END Movie | Harry Potter and the Chamber of Secrets
+    START Person | Daniel Radcliffe | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Harry Potter
+    START Person | Emma Watson | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Hermione Granger
+    START Person | Rupert Grint | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Ron Weasley
+    START Person | Maggie Smith | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Professor McGonagall
+    START Person | Alan Rickman | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Professor Snape
+    START Person | Richard Harris | ACTED_IN | END Movie | Harry Potter and the Chamber of Secrets | role: Albus Dumbledore
+    START Person | George Lucas | DIRECTED | END Movie | Star Wars: Episode IV - A New Hope
+    START Person | George Lucas | WROTE | END Movie | Star Wars: Episode IV - A New Hope
+    START Person | Mark Hamill | ACTED_IN | END Movie | Star Wars: Episode IV - A New Hope | role: Luke Skywalker
+    START Person | Harrison Ford | ACTED_IN | END Movie | Star Wars: Episode IV - A New Hope | role: Han Solo
+    START Person | Carrie Fisher | ACTED_IN | END Movie | Star Wars: Episode IV - A New Hope | role: Princess Leia
+    START Person | Alec Guinness | ACTED_IN | END Movie | Star Wars: Episode IV - A New Hope | role: Obi-Wan Kenobi
+    START Person | James Earl Jones | ACTED_IN | END Movie | Star Wars: Episode IV - A New Hope | role: Darth Vader (voice)
+    START Person | George Lucas | WROTE | END Movie | Star Wars: Episode V - The Empire Strikes Back
+    START Person | Mark Hamill | ACTED_IN | END Movie | Star Wars: Episode V - The Empire Strikes Back | role: Luke Skywalker
+    START Person | Harrison Ford | ACTED_IN | END Movie | Star Wars: Episode V - The Empire Strikes Back | role: Han Solo
+    START Person | Carrie Fisher | ACTED_IN | END Movie | Star Wars: Episode V - The Empire Strikes Back | role: Princess Leia
+    START Person | Alec Guinness | ACTED_IN | END Movie | Star Wars: Episode V - The Empire Strikes Back | role: Obi-Wan Kenobi
+    START Person | James Earl Jones | ACTED_IN | END Movie | Star Wars: Episode V - The Empire Strikes Back | role: Darth Vader (voice)
+    START Person | Francis Ford Coppola | DIRECTED | END Movie | The Godfather
+    START Person | Francis Ford Coppola | WROTE | END Movie | The Godfather
+    START Person | Marlon Brando | ACTED_IN | END Movie | The Godfather | role: Don Vito Corleone
+    START Person | Al Pacino | ACTED_IN | END Movie | The Godfather | role: Michael Corleone
+    START Person | James Caan | ACTED_IN | END Movie | The Godfather | role: Sonny Corleone
+    START Person | Diane Keaton | ACTED_IN | END Movie | The Godfather | role: Kay Adams
+    START Person | David Fincher | DIRECTED | END Movie | Fight Club
+    START Person | Brad Pitt | ACTED_IN | END Movie | Fight Club | role: Tyler Durden
+    START Person | Edward Norton | ACTED_IN | END Movie | Fight Club | role: The Narrator
+    START Person | Helena Bonham Carter | ACTED_IN | END Movie | Fight Club | role: Marla Singer
+    START Person | James Cameron | DIRECTED | END Movie | Titanic
+    START Person | James Cameron | WROTE | END Movie | Titanic
+    START Person | Leonardo DiCaprio | ACTED_IN | END Movie | Titanic | role: Jack Dawson
+    START Person | Kate Winslet | ACTED_IN | END Movie | Titanic | role: Rose DeWitt Bukater
+    START Person | Billy Zane | ACTED_IN | END Movie | Titanic | role: Cal Hockley
+    START Person | Bill Paxton | ACTED_IN | END Movie | Titanic | role: Brock Lovett
+    START Person | Steven Spielberg | DIRECTED | END Movie | Jurassic Park
+    START Person | Sam Neill | ACTED_IN | END Movie | Jurassic Park | role: Dr. Alan Grant
+    START Person | Laura Dern | ACTED_IN | END Movie | Jurassic Park | role: Dr. Ellie Sattler
+    START Person | Jeff Goldblum | ACTED_IN | END Movie | Jurassic Park | role: Dr. Ian Malcolm
+    START Person | Richard Attenborough | ACTED_IN | END Movie | Jurassic Park | role: John Hammond
+    START Person | Samuel L. Jackson | ACTED_IN | END Movie | Jurassic Park | role: Ray Arnold
+    START Person | Steven Spielberg | DIRECTED | END Movie | Catch Me If You Can
+    START Person | Leonardo DiCaprio | ACTED_IN | END Movie | Catch Me If You Can | role: Frank Abagnale Jr.
+    START Person | Tom Hanks | ACTED_IN | END Movie | Catch Me If You Can | role: Carl Hanratty
+    START Person | Christopher Walken | ACTED_IN | END Movie | Catch Me If You Can | role: Frank Abagnale Sr.
+    START Person | Martin Sheen | ACTED_IN | END Movie | Catch Me If You Can | role: Roger Strong
+    START Person | Frank Darabont | DIRECTED | END Movie | The Shawshank Redemption
+    START Person | Frank Darabont | WROTE | END Movie | The Shawshank Redemption
+    START Person | Tim Robbins | ACTED_IN | END Movie | The Shawshank Redemption | role: Andy Dufresne
+    START Person | Morgan Freeman | ACTED_IN | END Movie | The Shawshank Redemption | role: Ellis Boyd 'Red' Redding

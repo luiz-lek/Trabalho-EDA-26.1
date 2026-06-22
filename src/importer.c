@@ -123,14 +123,14 @@ void import_relationships(DB *db) {
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.person_id = hash_disk_get_value(&db->hash_person_lookup_context, token_buffer);
+        relationship.person_id = hash_disk_lookup(&db->hash_person_lookup_context, token_buffer);
 
         get_token_formated(line, token_buffer, '|');
         relationship.relationship_type = parse_relationship_STRING(token_buffer);
 
         jump_token(line, '|');
         get_token_formated(line, token_buffer, '|');
-        relationship.movie_id = hash_disk_get_value(&db->hash_movie_lookup_context, token_buffer);
+        relationship.movie_id = hash_disk_lookup(&db->hash_movie_lookup_context, token_buffer);
 
         // Só tem papel se for relação do tipo atuação
         if(relationship.relationship_type == ACTED_IN) {
@@ -142,7 +142,7 @@ void import_relationships(DB *db) {
         }
 
         // Insere no arquivo de relacionamento com as listas encadeadas de folme pra pessoa e pessoa pra filme
-        insert_relation(db->relation, &relationship,
+        insert_relation(db->fp_relations_data, &relationship,
             &db->hash_person_relations_context,
             &db->hash_movie_relations_context);
     }
@@ -173,5 +173,5 @@ void import_data(DB *db) {
     fflush(db->hash_movie_relations_context.fph);
     fflush(db->hash_movie_relations_context.fpd);
 
-    fflush(db->relation);
+    fflush(db->fp_relations_data);
 }

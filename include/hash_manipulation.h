@@ -5,20 +5,24 @@
 #ifndef TRABALHO_EDA_26_1_HASH_MANIPULATION_H
 #define TRABALHO_EDA_26_1_HASH_MANIPULATION_H
 
+#include <stdint.h>
+
 #include "hash.h"
 
 typedef struct Hash Hash;
 
 typedef enum {
     INT_INT,
-    STRING_INT
+    STRING_INT,
+    STR_STR,
+    TUPLE_INT
 } HashType;
 
 struct Hash {
-    HashNode **table;
-    int table_size;
+    HashCtx ctx;
     void (*insert)(Hash *self, const void*, const void*);
     void (*update_valor)(Hash *self, const void*, const void*);
+    void* (*lookup)(Hash *self, const void*);
     void (*remove)(Hash *self, const void*);
     void (*destroy)(Hash *self);
     void (*print)(Hash *self);

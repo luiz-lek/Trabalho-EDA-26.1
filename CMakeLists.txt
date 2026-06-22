@@ -31,4 +31,8 @@ add_executable (
         src/hash_manipulation.c
         include/hash_manipulation.h
         include/hash_disk.h
+        include/utils.h
+        src/utils.c
+        src/linked_list.c
+        include/linked_list.h
 )

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
     uint8_t is_leaf;
@@ -28,6 +29,8 @@ typedef struct {
          *fp_data;
 } TreeContext;
 
+void node_initialize(TreeNode *node, uint8_t t);
+bool tree_node_read(TreeNode *node, uint8_t t, FILE *fp, uint32_t offset);
 void tree_initialize(uint8_t t, const char *index, const char *data, const char *metadata);
 uint32_t tree_search(const TreeContext *ctx, uint32_t key);
 void tree_insert(TreeContext *ctx, uint32_t key, uint32_t offset_data);

@@ -2,8 +2,8 @@
 // Created by luizao on 01/06/2026.
 //
 
-#ifndef TRABALHO_EDA_26_1_HASH_H
-#define TRABALHO_EDA_26_1_HASH_H
+#ifndef TRABALHO_EDA_26_1_HASH_DISK_H
+#define TRABALHO_EDA_26_1_HASH_DISK_H
 
 #define TAM_HASH 101
 
@@ -13,8 +13,9 @@
 #include <string.h>
 #include <stdio.h>
 
-typedef uint8_t (*CompareFunction)(const void *a, const void *b);
-typedef uint32_t (*HashFunction)(const void *key);
+#include "utils.h"
+
+typedef uint32_t (*HashDISKFunction)(const void *key);
 
 typedef struct {
     union {
@@ -31,7 +32,7 @@ typedef struct {
     FILE *fph;
     FILE *fpd;
     CompareFunction comparator;
-    HashFunction generate_brute_number;
+    HashDISKFunction generate_brute_number;
     int num_buckets;
     size_t key_size;
     char data_file_name[70];
@@ -41,7 +42,7 @@ typedef struct {
 void hash_disk_initialize(const char *path_table, const char *path_data, int num_buckets);
 void hash_disk_insert(HashContext *ctx, const void *key, uint32_t valor);
 void hash_disk_remove_data(HashContext *ctx, int num_buckets, const void *key);
-uint32_t hash_disk_get_value(HashContext *ctx, const void *key);
+uint32_t hash_disk_lookup(HashContext *ctx, const void *key);
 void hash_disk_change_value(HashContext *ctx, const void *key, uint32_t new_value);
 void hash_disk_delete_table(const char *path_table, const char *path_data);
 

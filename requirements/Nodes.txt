@@ -165,3 +165,81 @@ Person | Madonna | 1954
 Person | Geena Davis | 1956
 Person | Lori Petty | 1963
 Person | Penny Marshall | 1943
+Movie | Inception | 2010 | Your mind is the scene of the crime
+Movie | Interstellar | 2014 | Mankind was born on Earth. It was never meant to die here.
+Movie | The Dark Knight | 2008 | Why So Serious?
+Movie | Pulp Fiction | 1994 | Just because you are a character doesn't mean that you have character.
+Movie | Django Unchained | 2012 | Life, liberty and the pursuit of vengeance.
+Movie | The Lord of the Rings: The Fellowship of the Ring | 2001 | One ring to rule them all.
+Movie | The Lord of the Rings: The Two Towers | 2002 | A New Power Is Rising.
+Person | Christopher Nolan | 1970
+Person | Leonardo DiCaprio | 1974
+Person | Joseph Gordon-Levitt | 1981
+Person | Elliot Page | 1987
+Person | Tom Hardy | 1977
+Person | Matthew McConaughey | 1969
+Person | Anne Hathaway | 1982
+Person | Jessica Chastain | 1977
+Person | Heath Ledger | 1979
+Person | Gary Oldman | 1958
+Person | Michael Caine | 1933
+Person | Morgan Freeman | 1937
+Person | Quentin Tarantino | 1963
+Person | John Travolta | 1954
+Person | Samuel L. Jackson | 1948
+Person | Uma Thurman | 1970
+Person | Jamie Foxx | 1967
+Person | Christoph Waltz | 1956
+Person | Peter Jackson | 1961
+Person | Elijah Wood | 1981
+Person | Viggo Mortensen | 1958
+Person | Orlando Bloom | 1977
+Person | Sean Astin | 1971
+Movie | The Avengers | 2012 | Some assembly required.
+Movie | Iron Man | 2008 | Heroes aren't born. They're built.
+Movie | Harry Potter and the Sorcerer's Stone | 2001 | Let the Magic Begin.
+Movie | Harry Potter and the Chamber of Secrets | 2002 | Hogwarts is back in session.
+Movie | Star Wars: Episode IV - A New Hope | 1977 | A long time ago in a galaxy far, far away...
+Movie | Star Wars: Episode V - The Empire Strikes Back | 1980 | The Adventure Continues...
+Movie | The Godfather | 1972 | An offer you can't refuse.
+Movie | Fight Club | 1999 | Mischief. Mayhem. Soap.
+Movie | Titanic | 1997 | Nothing on Earth could come between them.
+Movie | Jurassic Park | 1993 | An adventure 65 million years in the making.
+Movie | Catch Me If You Can | 2002 | The true story of a real fake.
+Movie | The Shawshank Redemption | 1994 | Fear can hold you prisoner. Hope can set you free.
+Person | Robert Downey Jr. | 1965
+Person | Chris Evans | 1981
+Person | Scarlett Johansson | 1984
+Person | Chris Hemsworth | 1983
+Person | Mark Ruffalo | 1967
+Person | Joss Whedon | 1964
+Person | Jon Favreau | 1966
+Person | Gwyneth Paltrow | 1972
+Person | Daniel Radcliffe | 1989
+Person | Emma Watson | 1990
+Person | Rupert Grint | 1988
+Person | Maggie Smith | 1934
+Person | Alan Rickman | 1946
+Person | Mark Hamill | 1951
+Person | Harrison Ford | 1942
+Person | George Lucas | 1944
+Person | Alec Guinness | 1914
+Person | James Earl Jones | 1931
+Person | Marlon Brando | 1924
+Person | James Caan | 1940
+Person | Francis Ford Coppola | 1939
+Person | Brad Pitt | 1963
+Person | Edward Norton | 1969
+Person | Helena Bonham Carter | 1966
+Person | David Fincher | 1962
+Person | Kate Winslet | 1975
+Person | James Cameron | 1954
+Person | Billy Zane | 1966
+Person | Sam Neill | 1947
+Person | Laura Dern | 1967
+Person | Jeff Goldblum | 1952
+Person | Richard Attenborough | 1923
+Person | Steven Spielberg | 1946
+Person | Christopher Walken | 1943
+Person | Martin Sheen | 1940
+Person | Tim Robbins | 1958

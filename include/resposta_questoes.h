@@ -5,6 +5,8 @@
 #ifndef TRABALHO_EDA_26_1_RESPOSTA_QUESTOES_H
 #define TRABALHO_EDA_26_1_RESPOSTA_QUESTOES_H
 
-void pessoas_trabalharam_juntas(); // A
+#include "data_base_manipulation.h"
+
+void pessoas_trabalharam_juntas(DB *db); // A
 
 #endif

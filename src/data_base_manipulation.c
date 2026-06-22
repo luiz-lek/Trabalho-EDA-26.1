@@ -8,6 +8,7 @@
 #include "../include/hash_disk.h"
 #include "../include/person.h"
 #include "../include/movie.h"
+#include "utils.h"
 
 void db_inicialize(int t) {
     movie_tree_initialize(t);
@@ -25,27 +26,21 @@ void db_inicialize(int t) {
 }
 
 void db_destroy() {
-    remove(PATH_TREE_MOVIE_INDEX);
-    remove(PATH_TREE_MOVIE_DATA);
-    remove(PATH_TREE_MOVIE_METADATA);
+    const char *files_to_delete[] = {
+        PATH_TREE_MOVIE_INDEX, PATH_TREE_MOVIE_DATA, PATH_TREE_MOVIE_METADATA,
+        PATH_TREE_PERSON_INDEX, PATH_TREE_PERSON_DATA, PATH_TREE_PERSON_METADATA,
+        PATH_HASH_MOVIE_LOOKUP_TABLE, PATH_HASH_MOVIE_LOOKUP_DATA,
+        PATH_HASH_PERSON_LOOKUP_TABLE, PATH_HASH_PERSON_LOOKUP_DATA,
+        PATH_HASH_MOVIE_RELS_TABLE, PATH_HASH_MOVIE_RELS_DATA,
+        PATH_HASH_PERSON_RELS_TABLE, PATH_HASH_PERSON_RELS_DATA,
+        PATH_RELATIONS_DATA
+    };
 
-    remove(PATH_TREE_PERSON_INDEX);
-    remove(PATH_TREE_PERSON_DATA);
-    remove(PATH_TREE_PERSON_METADATA);
+    int num_files = sizeof(files_to_delete) / sizeof(files_to_delete[0]);
 
-    remove(PATH_HASH_MOVIE_LOOKUP_TABLE);
-    remove(PATH_HASH_MOVIE_LOOKUP_DATA);
-
-    remove(PATH_HASH_PERSON_LOOKUP_TABLE);
-    remove(PATH_HASH_PERSON_LOOKUP_DATA);
-
-    remove(PATH_HASH_MOVIE_RELS_TABLE);
-    remove(PATH_HASH_MOVIE_RELS_DATA);
-
-    remove(PATH_HASH_PERSON_RELS_TABLE);
-    remove(PATH_HASH_PERSON_RELS_DATA);
-
-    remove(PATH_RELATIONS_DATA);
+    for (int i = 0; i < num_files; i++) {
+        remove(files_to_delete[i]);
+    }
 }
 
 void db_load_context(DB *db) {
@@ -56,7 +51,7 @@ void db_load_context(DB *db) {
     open_hash_movie_to_id_context(&db->hash_movie_lookup_context);
     open_hash_person_to_movie_context(&db->hash_person_relations_context);
     open_hash_movie_to_person_context(&db->hash_movie_relations_context);
-    db->relation = open_file(PATH_RELATIONS_DATA, "rb+");
+    db->fp_relations_data = open_file(PATH_RELATIONS_DATA, "rb+");
 }
 
 void db_close_context(DB *db) {
@@ -67,7 +62,7 @@ void db_close_context(DB *db) {
     close_hash_context(&db->hash_movie_lookup_context);
     close_hash_context(&db->hash_person_relations_context);
     close_hash_context(&db->hash_movie_relations_context);
-    fclose(db->relation);
+    fclose(db->fp_relations_data);
 }
 
 uint32_t hash_string(const void *key) {
@@ -111,7 +106,7 @@ void tree_person_get_context(TreeContext *ctx) {
 }
 
 uint32_t person_tree_search_by_name(TreeContext *tree_ctx, HashContext *hash_context, char *name) {
-    uint32_t id = hash_disk_get_value(hash_context, name);
+    uint32_t id = hash_disk_lookup(hash_context, name);
 
     if(id == DISK_NULL) {
         printf("[tree] pessoa não encontrada.\n");
@@ -136,7 +131,7 @@ void movie_tree_initialize(uint8_t t) {
 }
 
 uint32_t movie_tree_search_by_title(TreeContext *tree_ctx, HashContext *hash_ctx, char *title) {
-    uint32_t id = hash_disk_get_value(hash_ctx, title);
+    uint32_t id = hash_disk_lookup(hash_ctx, title);
 
     if(id == DISK_NULL) {
         printf("[tree] filme não encontrada.\n");
@@ -172,7 +167,7 @@ void close_tree_context(TreeContext *ctx) {
 void open_hash_movie_to_id_context(HashContext *ctx) {
     ctx->fph = open_file(PATH_HASH_MOVIE_LOOKUP_TABLE, "rb+");
     ctx->fpd = open_file(PATH_HASH_MOVIE_LOOKUP_DATA, "rb+");
-    ctx->comparator = compare_str;
+    ctx->comparator = str_compare;
     ctx->generate_brute_number = hash_string;
     ctx->key_size = NAME_LENGTH;
     ctx->num_buckets = TAM_HASH;
@@ -197,7 +192,7 @@ void hash_movie_to_id_delete_table() {
 void open_hash_person_to_id_context(HashContext *ctx) {
     ctx->fph = open_file(PATH_HASH_PERSON_LOOKUP_TABLE, "rb+");
     ctx->fpd = open_file(PATH_HASH_PERSON_LOOKUP_DATA, "rb+");
-    ctx->comparator = compare_str;
+    ctx->comparator = str_compare;
     ctx->generate_brute_number = hash_string;
     ctx->key_size = NAME_LENGTH;
     ctx->num_buckets = TAM_HASH;
@@ -222,7 +217,7 @@ void hash_person_to_id_delete_table() {
 void open_hash_movie_to_person_context(HashContext *ctx) {
     ctx->fph = open_file(PATH_HASH_MOVIE_RELS_TABLE, "rb+");
     ctx->fpd = open_file(PATH_HASH_MOVIE_RELS_DATA, "rb+");
-    ctx->comparator = compare_int;
+    ctx->comparator = int_compare;
     ctx->generate_brute_number = hash_int;
     ctx->key_size = sizeof(uint32_t);
     ctx->num_buckets = TAM_HASH;
@@ -248,7 +243,7 @@ void hash_movie_to_person_delete_table() {
 void open_hash_person_to_movie_context(HashContext *ctx) {
     ctx->fph = open_file(PATH_HASH_PERSON_RELS_TABLE, "rb+");
     ctx->fpd = open_file(PATH_HASH_PERSON_RELS_DATA, "rb+");
-    ctx->comparator = compare_int;
+    ctx->comparator = int_compare;
     ctx->generate_brute_number = hash_int;
     ctx->key_size = sizeof(uint32_t);
     ctx->num_buckets = TAM_HASH;
@@ -290,11 +285,11 @@ void insert_relation(FILE *fp,
     // pendente: Adiocionar função para reaproveitar espaços vazio no meio do arquivo (remoção de relacionamento)
     uint32_t offset_new_relation = file_size(fp);
 
-    r->offset_next_person = hash_disk_get_value(hash_movie_to_person_ctx, &r->movie_id);
+    r->offset_next_person = hash_disk_lookup(hash_movie_to_person_ctx, &r->movie_id);
     if(r->offset_next_person == DISK_NULL) hash_disk_insert(hash_movie_to_person_ctx, &r->movie_id, offset_new_relation);
     else hash_disk_change_value(hash_movie_to_person_ctx, &r->movie_id, offset_new_relation);
 
-    r->offset_next_movie = hash_disk_get_value(hash_person_to_movie_ctx, &r->person_id);
+    r->offset_next_movie = hash_disk_lookup(hash_person_to_movie_ctx, &r->person_id);
     if(r->offset_next_movie == DISK_NULL) hash_disk_insert(hash_person_to_movie_ctx, &r->person_id, offset_new_relation);
     else hash_disk_change_value(hash_person_to_movie_ctx, &r->person_id, offset_new_relation);
 

@@ -16,7 +16,7 @@ typedef struct {
                 hash_person_relations_context,
                 hash_movie_relations_context;
 
-    FILE *relation;
+    FILE *fp_relations_data;
 } DB;
 
 void db_inicialize(int t);
